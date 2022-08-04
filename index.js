@@ -11,9 +11,11 @@ let id = 0;
 let sinvel;
 let llen;
 let whench;
+let rectr;
 let monocromo;
 let sat = 10;
-
+let maxRectSz;
+let bw;
 // Part circ
 let partCirc;
 
@@ -30,7 +32,7 @@ function setup() {
 	seed = int(fxrand() * 1111111191111111);
 	overlay = document.querySelector(".overlay");
 	createCanvas(2160, 2160);
-	pixelDensity(1);
+	pixelDensity(2);
 	randomSeed(seed);
 	noiseSeed(seed);
 	// noLoop();
@@ -39,10 +41,12 @@ function setup() {
 	monocromo = int(random(360)) % 360;
 	overlay.style.display = "none";
 	rot = int(random(4)) * HALF_PI;
-	sinvel = random(1, 8);
+	sinvel = random(1, 3);
 	llen = random(0.5, 5);
-	whench = random(20, 120);
-
+	whench = random(20, 80);
+	maxRectSz = random(80, 200);
+	rectr = random();
+	bw = random();
 	//
 	partCirc = boolean(int(random(2)));
 
@@ -55,16 +59,21 @@ function setup() {
 
 	// background
 	// background(int(random(2)) * 255);
-	background(0);
+	background(255);
+	if (random() < 0.5) {
+		background(0);
+	}
 	rotateAll(4);
 	// if (random() < 0.5) {
 	// 	bgRect();
 	// }
 
 	// Noise
-	bgNoise();
-	rotateAll(4);
-	bgNoise();
+	if (random() < 0.5) {
+		bgNoise();
+		rotateAll(4);
+		bgNoise();
+	}
 	// for (let i = 0; i < 250000; i++) {
 	// 	strokeWeight(random(1, 5));
 	// 	stroke(int(random(2)) * 360, 3);
@@ -80,10 +89,17 @@ function setup() {
 
 	particles = [];
 	let varh = random(100, 600);
-	if (!partCirc) {
+	if (random() < 0.33) {
 		for (let i = 0; i < 250; i++) {
 			let p = new Particle(0, random(-varh, varh));
 			particles.push(p);
+		}
+	} else if (random() < 0.66) {
+		for (let x = -width / 2 + 500; x < width / 2 - 500; x += 100) {
+			for (let y = -height / 2 + 500; y < height / 2 + 500; y += 100) {
+				let p = new Particle(x, y);
+				particles.push(p);
+			}
 		}
 	} else {
 		let ang = TAU / 255;
@@ -154,12 +170,12 @@ function draw() {
 					}
 				}
 			} else {
-				if (id % 5 == 0) {
+				if (id % 10 == 0) {
 					stroke(
 						monocromo,
 						sat,
 						map(sin(a * 5), -1, 1, 40, 100),
-						map(sin(a * 3), -1, 1, 2, 20),
+						map(sin(a * 3), -1, 1, 2, 10),
 					);
 					rectMode(CENTER);
 					noFill();
@@ -172,25 +188,26 @@ function draw() {
 
 			if (p.render) {
 				setShadow(0, 15, 15, 100);
+				// bright
+				let b = map(frameCount, 0, 250, 100, 0);
+				if (bw < 0.2) {
+					b = 0;
+				}
 				if (frameCount > whench) {
 					noFill();
-					stroke(
-						monocromo,
-						map(frameCount, 0, 250, 100, 0),
-						map(sin(a), -1, 1, 40, 100),
-					);
+					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100), 30);
 					strokeWeight(map(sin(a * sinvel), -1, 1, 1, 10));
 					point(p.pos.x, p.pos.y);
 				} else {
 					noStroke();
 					rectMode(CENTER);
-					stroke(
-						monocromo,
-						map(frameCount, 0, 250, 100, 0),
-						map(sin(a), -1, 1, 40, 100),
-					);
-					let sz = map(sin(a * sinvel), -1, 1, 5, 100);
-					rect(p.pos.x, p.pos.y, sz, sz);
+					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100));
+					let sz = map(sin(a * sinvel), -1, 1, 5, maxRectSz);
+					let szr = map(sin(a * sinvel), -1, 1, 0, maxRectSz);
+					if (rectr < 0.5) {
+						szr = 0;
+					}
+					rect(p.pos.x, p.pos.y, sz, sz, szr, 0, szr, 0);
 				}
 				id++;
 			}
@@ -205,21 +222,23 @@ function draw() {
 	}
 }
 function bgNoise() {
+	let maxr = random(50, 90);
+	let d = pixelDensity();
 	pbgNoise.clear();
 	pbgNoise.background(0, 0, 0, 0);
 	pbgNoise.loadPixels();
 	for (let x = 0; x < pbgNoise.width; x += 1) {
 		for (let y = 0; y < pbgNoise.height; y += 1) {
-			// loop over
 			let index =
 				4 *
-				((x + int(random(5))) * pbgNoise.width + (y + int(random(5))));
+				((x * d + int(random(5))) * pbgNoise.width + (y * d + int(random(5))));
+			// loop over
 			pbgNoise.pixels[index] =
 				pbgNoise.pixels[index + 1] =
 				pbgNoise.pixels[index + 2] =
 					int(random(256));
 			pbgNoise.pixels[index + 3] = int(
-				map(x, 0, pbgNoise.width, 0, random(10, 50)),
+				map(x, 0, pbgNoise.width, 0, random(10, maxr)),
 			);
 		}
 	}
