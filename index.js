@@ -16,6 +16,7 @@ let monocromo;
 let sat = 10;
 let maxRectSz;
 let bw;
+let partShape;
 // Part circ
 let partCirc;
 
@@ -31,22 +32,24 @@ let pbgNoise;
 function setup() {
 	seed = int(fxrand() * 1111111191111111);
 	overlay = document.querySelector(".overlay");
-	createCanvas(2160, 2160);
-	pixelDensity(2);
+	let cv = createCanvas(2160, 2160);
+	cv.id("monocromo");
+	pixelDensity(1);
 	randomSeed(seed);
 	noiseSeed(seed);
 	// noLoop();
 	colorMode(HSB, 360, 100, 100, 100);
 	pbgNoise = createGraphics(width, height);
 	monocromo = int(random(360)) % 360;
-	overlay.style.display = "none";
 	rot = int(random(4)) * HALF_PI;
 	sinvel = random(1, 3);
 	llen = random(0.5, 5);
 	whench = random(20, 80);
 	maxRectSz = random(80, 200);
-	rectr = random();
+	rectr = random(2.0) % 1.0;
+	console.log(rectr);
 	bw = random();
+	partShape = random();
 	//
 	partCirc = boolean(int(random(2)));
 
@@ -57,73 +60,15 @@ function setup() {
 	diamMin = random(10, 50);
 	diamMax = random(80, 400);
 
-	// background
-	// background(int(random(2)) * 255);
-	background(255);
-	if (random() < 0.5) {
-		background(0);
-	}
-	rotateAll(4);
-	// if (random() < 0.5) {
-	// 	bgRect();
-	// }
-
-	// Noise
-	if (random() < 0.5) {
-		bgNoise();
-		rotateAll(4);
-		bgNoise();
-	}
-	// for (let i = 0; i < 250000; i++) {
-	// 	strokeWeight(random(1, 5));
-	// 	stroke(int(random(2)) * 360, 3);
-	// 	point(random(width), random(height));
-	// }
-
-	push();
-	setShadow(0, 20, 20, 100);
-	rotateAll(4);
-	//sliceCanvas("Y");
 	rectMode(CENTER);
-	pop();
 
-	particles = [];
-	let varh = random(100, 600);
-	if (random() < 0.33) {
-		for (let i = 0; i < 250; i++) {
-			let p = new Particle(0, random(-varh, varh));
-			particles.push(p);
-		}
-	} else if (random() < 0.66) {
-		for (let x = -width / 2 + 500; x < width / 2 - 500; x += 100) {
-			for (let y = -height / 2 + 500; y < height / 2 + 500; y += 100) {
-				let p = new Particle(x, y);
-				particles.push(p);
-			}
-		}
-	} else {
-		let ang = TAU / 255;
-		let rad = random(50, 600);
-		for (let i = 0; i < 250; i++) {
-			let x = cos(ang * i) * rad;
-			let y = sin(ang * i) * rad;
-			let p = new Particle(x, y);
-			particles.push(p);
-		}
-	}
-
-	push();
-	rotateAll(4);
-	strokeWeight(random(1, 5));
-	stroke(monocromo, sat, random(100));
-	//line(width / 2, 0, width / 2, height);
-	pop();
-
+	render();
 	// push();
 	// rotateAll(4);
-	// sliceCanvas("Y");
+	// strokeWeight(random(1, 5));
+	// stroke(monocromo, sat, random(100));
 	// pop();
-	// Console
+
 	document.title = `Otro | Andr\u00e9s Senn | 2022`;
 	console.log(
 		`%cOtro | Andr\u00e9s Senn | Projet: `,
@@ -146,13 +91,13 @@ function draw() {
 			let s = map(sin(a * 3), -1, 1, 5, 200);
 			setShadow(0, 0, 0, 0);
 			if (frameCount > 100) {
-				if (id % 3 == 0) {
+				if (id % 6 == 0) {
 					strokeWeight(random(0.6, 2));
 					stroke(
 						monocromo,
 						sat,
 						map(sin(a * 10), -1, 1, 40, 100),
-						map(sin(a * 10), -1, 1, 0, 5),
+						map(sin(a * 10), -1, 1, 0, 4),
 					);
 					line(-s * llen * 0.4, 0, s * llen * 0.4, 0);
 					if (random() > 0.8) {
@@ -164,7 +109,7 @@ function draw() {
 							monocromo,
 							sat,
 							map(sin(a * 5), -1, 1, 20, 100),
-							map(sin(a * 2), -1, 1, 0, 3),
+							map(sin(a * 2), -1, 1, 0, 5),
 						);
 						circle(0, 0, map(sin(a * 2), -1, 1, diamMin, diamMax));
 					}
@@ -198,6 +143,34 @@ function draw() {
 					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100), 30);
 					strokeWeight(map(sin(a * sinvel), -1, 1, 1, 10));
 					point(p.pos.x, p.pos.y);
+					if (id % 20 == 0) {
+						// Line
+
+						strokeWeight(1);
+						stroke(random(360), random(10, 50));
+						let addx = random(-50, 50);
+						let addy = random(-50, 50);
+						if (random() < 0.03) {
+							line(
+								p.pos.x,
+								p.pos.y,
+								random(-20, 20),
+								0,
+							);
+						} else {
+							line(
+								p.pos.x,
+								p.pos.y,
+								p.pos.x + addx,
+								p.pos.y + addy,
+							);
+						}
+
+						// Point
+						strokeWeight(random(1, 6));
+						stroke(random(360), random(20, 60));
+						point(p.pos.x + addx, p.pos.y + addy);
+					}
 				} else {
 					noStroke();
 					rectMode(CENTER);
@@ -207,6 +180,15 @@ function draw() {
 					if (rectr < 0.5) {
 						szr = 0;
 					}
+					if (id % 3 == 0) {
+						strokeWeight(random(1, 6));
+						stroke(random(360), random(20, 60));
+						point(
+							p.pos.x + random(-20, 20),
+							p.pos.y + random(-20, 20),
+						);
+					}
+					strokeWeight(0.6);
 					rect(p.pos.x, p.pos.y, sz, sz, szr, 0, szr, 0);
 				}
 				id++;
@@ -221,8 +203,57 @@ function draw() {
 		}
 	}
 }
+function render() {
+	randomSeed(seed);
+	noiseSeed(seed);
+	// background
+	background(255);
+	if (random() < 0.5) {
+		background(0);
+	}
+	rotateAll(4);
+
+	// BG Noise
+	bgNoise();
+
+	setShadow(0, 20, 20, 100);
+
+	rotateAll(4);
+
+	particles = [];
+	let varh = random(0, 100);
+	let partBX = random(0, 700);
+	let partBY = random(0, 700);
+	if (partShape < 0.33) {
+		for (let i = 0; i < 250; i++) {
+			let p = new Particle(0, random(-varh, varh));
+			particles.push(p);
+		}
+	} else if (partShape < 0.66) {
+		for (let x = -width / 2 + partBX; x < width / 2 - partBX; x += 100) {
+			for (
+				let y = -height / 2 + partBY;
+				y < height / 2 - partBY;
+				y += 100
+			) {
+				let p = new Particle(x, y);
+				particles.push(p);
+			}
+		}
+	} else {
+		let ang = TAU / 255;
+		let rad = random(100, 950);
+		for (let i = 0; i < 250; i++) {
+			let x = cos(ang * i) * rad;
+			let y = sin(ang * i) * rad;
+			let p = new Particle(x, y);
+			particles.push(p);
+		}
+	}
+	overlay.style.display = "none";
+}
 function bgNoise() {
-	let maxr = random(50, 90);
+	let maxr = random(50, 120);
 	let d = pixelDensity();
 	pbgNoise.clear();
 	pbgNoise.background(0, 0, 0, 0);
@@ -231,7 +262,8 @@ function bgNoise() {
 		for (let y = 0; y < pbgNoise.height; y += 1) {
 			let index =
 				4 *
-				((x * d + int(random(5))) * pbgNoise.width + (y * d + int(random(5))));
+				((x * d + int(random(5))) * (pbgNoise.width * d) +
+					(y * d + int(random(5))));
 			// loop over
 			pbgNoise.pixels[index] =
 				pbgNoise.pixels[index + 1] =
@@ -301,19 +333,32 @@ function bgRect() {
 	rect(0, 0, width, height);
 	pop();
 }
+
+function keyPressed() {
+	switch (key) {
+		case "1":
+			overlay.style.display = "flex";
+			clear();
+			pixelDensity(1);
+			frameCount = 0;
+			break;
+		case "2":
+			overlay.style.display = "flex";
+			clear();
+			pixelDensity(2);
+			frameCount = 0;
+			break;
+	}
+}
 function keyReleased() {
 	switch (key) {
 		case "1":
-			pixelDensity(1);
+			render();
+			loop();
 			break;
 		case "2":
-			pixelDensity(2);
-			break;
-		case "3":
-			pixelDensity(3);
-			break;
-		case "4":
-			pixelDensity(4);
+			render();
+			loop();
 			break;
 	}
 	if (key == "s" || key == "S") {
