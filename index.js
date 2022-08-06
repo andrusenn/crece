@@ -4,8 +4,10 @@ Andrés Senn
 let overlay;
 let loaded = false;
 let seed;
-let elli = [];
 let particles;
+let numPart;
+let partConn = [];
+let partConnSz;
 let rot;
 let id = 0;
 let sinvel;
@@ -13,10 +15,13 @@ let llen;
 let whench;
 let rectr;
 let monocromo;
+let bright;
 let sat = 10;
 let maxRectSz;
 let bw;
 let partShape;
+let maxMinp;
+let maxMainp;
 // Part circ
 let partCirc;
 
@@ -29,6 +34,12 @@ let diamMin, diamMax;
 
 // Noise
 let pbgNoise;
+
+// Sizes
+// let DEFSIZE = 2160;
+// let CS = Math.min(window.innerWidth,window.innerHeight);
+// let RZ = CS / DEFSIZE;
+
 function setup() {
 	seed = int(fxrand() * 1111111191111111);
 	overlay = document.querySelector(".overlay");
@@ -41,6 +52,7 @@ function setup() {
 	colorMode(HSB, 360, 100, 100, 100);
 	pbgNoise = createGraphics(width, height);
 	monocromo = int(random(360)) % 360;
+	bright = int(random(30, 101));
 	rot = int(random(4)) * HALF_PI;
 	sinvel = random(1, 3);
 	llen = random(0.5, 5);
@@ -50,6 +62,9 @@ function setup() {
 	console.log(rectr);
 	bw = random();
 	partShape = random();
+	partConnSz = random(0.1, 1);
+	maxMainp = random(10, 50);
+	maxMinp = random(5, 20);
 	//
 	partCirc = boolean(int(random(2)));
 
@@ -63,11 +78,6 @@ function setup() {
 	rectMode(CENTER);
 
 	render();
-	// push();
-	// rotateAll(4);
-	// strokeWeight(random(1, 5));
-	// stroke(monocromo, sat, random(100));
-	// pop();
 
 	document.title = `Otro | Andr\u00e9s Senn | 2022`;
 	console.log(
@@ -134,28 +144,54 @@ function draw() {
 			if (p.render) {
 				setShadow(0, 15, 15, 100);
 				// bright
-				let b = map(frameCount, 0, 250, 100, 0);
+				let b = map(frameCount, 0, 250, bright, 0);
 				if (bw < 0.2) {
 					b = 0;
 				}
 				if (frameCount > whench) {
-					noFill();
-					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100), 30);
-					strokeWeight(map(sin(a * sinvel), -1, 1, 1, 10));
-					point(p.pos.x, p.pos.y);
-					if (id % 20 == 0) {
-						// Line
+					//noFill();
 
+					// Main Points
+					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100), 100);
+					let sw = 10;
+					if (id % 50 == 0) {
+						sw = maxMainp;
+					}
+					strokeWeight(map(sin(a * sinvel), -1, 1, 1, sw));
+					point(p.pos.x, p.pos.y);
+
+					if (id % 20 == 0) {
+						// Line points conn
 						strokeWeight(1);
-						stroke(random(360), random(10, 50));
+						stroke(int(random(2)) * 360, random(10, 50));
 						let addx = random(-50, 50);
 						let addy = random(-50, 50);
-						if (random() < 0.03) {
+						if (random() < 0.01) {
+							let idx = int(random(partConn.length));
 							line(
 								p.pos.x,
 								p.pos.y,
-								random(-20, 20),
-								0,
+								partConn[idx].x,
+								partConn[idx].y,
+							);
+							circle(
+								partConn[idx].x,
+								partConn[idx].y,
+								random(5, 10),
+							);
+
+							strokeWeight(1);
+							stroke(random(360), random(10, 50));
+							circle(
+								partConn[idx].x,
+								partConn[idx].y,
+								map(
+									frameCount,
+									0,
+									250,
+									0,
+									(width / 2) * partConnSz + random(-50, 50),
+								),
 							);
 						} else {
 							line(
@@ -166,9 +202,9 @@ function draw() {
 							);
 						}
 
-						// Point
-						strokeWeight(random(1, 6));
-						stroke(random(360), random(20, 60));
+						// Min Points
+						strokeWeight(random(1, maxMinp));
+						stroke(int(random(2)) * 360, random(20, 60));
 						point(p.pos.x + addx, p.pos.y + addy);
 					}
 				} else {
@@ -181,8 +217,9 @@ function draw() {
 						szr = 0;
 					}
 					if (id % 3 == 0) {
+						// Dots
 						strokeWeight(random(1, 6));
-						stroke(random(360), random(20, 60));
+						stroke(int(random(2)) * 360, random(20, 60));
 						point(
 							p.pos.x + random(-20, 20),
 							p.pos.y + random(-20, 20),
@@ -207,25 +244,26 @@ function render() {
 	randomSeed(seed);
 	noiseSeed(seed);
 	// background
-	background(255);
-	if (random() < 0.5) {
-		background(0);
+	background(0);
+	if (random() < 0.1) {
+		background(255);
 	}
 	rotateAll(4);
 
 	// BG Noise
-	bgNoise();
+	bgNoise2();
 
 	setShadow(0, 20, 20, 100);
 
 	rotateAll(4);
 
 	particles = [];
+	numPart = random(200, 350);
 	let varh = random(0, 100);
 	let partBX = random(0, 700);
 	let partBY = random(0, 700);
 	if (partShape < 0.33) {
-		for (let i = 0; i < 250; i++) {
+		for (let i = 0; i < numPart; i++) {
 			let p = new Particle(0, random(-varh, varh));
 			particles.push(p);
 		}
@@ -243,12 +281,22 @@ function render() {
 	} else {
 		let ang = TAU / 255;
 		let rad = random(100, 950);
-		for (let i = 0; i < 250; i++) {
+		for (let i = 0; i < numPart; i++) {
 			let x = cos(ang * i) * rad;
 			let y = sin(ang * i) * rad;
 			let p = new Particle(x, y);
 			particles.push(p);
 		}
+	}
+
+	// Part conn
+	let partConnNum = random(2, 8);
+	for (let i = 0; i < partConnNum; i++) {
+		let conn = createVector(
+			random(-width / 2, width / 2),
+			random(-height / 2, height / 2),
+		);
+		partConn.push(conn);
 	}
 	overlay.style.display = "none";
 }
@@ -275,6 +323,19 @@ function bgNoise() {
 		}
 	}
 	pbgNoise.updatePixels();
+	image(pbgNoise, 0, 0);
+}
+
+function bgNoise2() {
+	pbgNoise.clear();
+	pbgNoise.background(0, 0, 0, 0);
+	for (let x = 0; x < pbgNoise.width; x += 4) {
+		for (let y = 0; y < pbgNoise.height; y += 4) {
+			strokeWeight(random(1, 3));
+			stroke(random(361), map(x, 0, pbgNoise.width, 0, random(5, 20)));
+			point(x + random(-5, 5), y + random(-5, 5));
+		}
+	}
 	image(pbgNoise, 0, 0);
 }
 function sliceCanvas(_slice) {
@@ -336,6 +397,12 @@ function bgRect() {
 
 function keyPressed() {
 	switch (key) {
+		case "0":
+			overlay.style.display = "flex";
+			clear();
+			pixelDensity(0.6);
+			frameCount = 0;
+			break;
 		case "1":
 			overlay.style.display = "flex";
 			clear();
@@ -352,6 +419,10 @@ function keyPressed() {
 }
 function keyReleased() {
 	switch (key) {
+		case "0":
+			render();
+			loop();
+			break;
 		case "1":
 			render();
 			loop();
@@ -389,13 +460,6 @@ function grabImage() {
 	saveCanvas("__" + date);
 }
 
-class Elli {
-	constructor(x, y, r) {
-		this.x = x;
-		this.y = y;
-		this.r = r;
-	}
-}
 class Particle {
 	constructor(x, y) {
 		this.pos = createVector(x, y);
@@ -405,10 +469,11 @@ class Particle {
 		this.maxMarg = random(100, 300);
 		this.a = 0;
 		this.dir = createVector(0, 0);
-		this.off = random(0.5, 1);
+		this.off = random(0, 0.2);
 		this.mult = 0.7;
 		this.n = 0;
 		this.ns = 0.001;
+		this.offc = random(0.0, 0.002);
 		this.count = 0;
 		this.render = true;
 	}
@@ -424,7 +489,7 @@ class Particle {
 		this.vel.add(this.dir);
 		this.vel.mult(this.mult);
 		this.pos.add(this.vel);
-		this.off += 0.0;
+		this.off += this.offc;
 		this.count++;
 		this.check();
 	}
