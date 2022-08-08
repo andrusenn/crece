@@ -1,4 +1,7 @@
 /*
+
+Estados en monocromo.
+
 Andrés Senn
 */
 let overlay;
@@ -8,13 +11,15 @@ let particles;
 let numPart;
 let partConn = [];
 let partConnSz;
+let partBif, partBifDist;
 let rot;
 let id = 0;
 let sinvel;
 let llen;
 let whench;
 let rectr;
-let monocromo;
+let monocromo, monocromo2;
+let bicol;
 let bright;
 let sat = 10;
 let maxRectSz;
@@ -52,14 +57,15 @@ function setup() {
 	colorMode(HSB, 360, 100, 100, 100);
 	pbgNoise = createGraphics(width, height);
 	monocromo = int(random(360)) % 360;
-	bright = int(random(30, 101));
+	monocromo2 = int(random(360)) % 360;
+	bicol = boolean(int(random(2)));
+	bright = 70;
 	rot = int(random(4)) * HALF_PI;
 	sinvel = random(1, 3);
 	llen = random(0.5, 5);
 	whench = random(20, 80);
 	maxRectSz = random(80, 200);
 	rectr = random(2.0) % 1.0;
-	console.log(rectr);
 	bw = random();
 	partShape = random();
 	partConnSz = random(0.1, 1);
@@ -67,6 +73,8 @@ function setup() {
 	maxMinp = random(5, 20);
 	//
 	partCirc = boolean(int(random(2)));
+	partBif = boolean(int(random(2)));
+	partBifDist = random(200,800);
 
 	// Slice width
 	sliaceW = random(50, 1000);
@@ -140,7 +148,7 @@ function draw() {
 				}
 			}
 			pop();
-
+			// Render ---------------------------------------------------
 			if (p.render) {
 				setShadow(0, 15, 15, 100);
 				// bright
@@ -153,12 +161,27 @@ function draw() {
 
 					// Main Points
 					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100), 100);
+					if(bicol && frameCount % 250 > 30 && frameCount % 250 < 100){
+						let lerp = lerpColor(monocromo,monocromo2,frameCount / 250);
+						stroke(lerp, b, map(sin(a), -1, 1, 40, 100), 100);
+					}
 					let sw = 10;
 					if (id % 50 == 0) {
 						sw = maxMainp;
 					}
 					strokeWeight(map(sin(a * sinvel), -1, 1, 1, sw));
 					point(p.pos.x, p.pos.y);
+
+					if (id % 50 == 0) {
+						for (let i = 0; i < 20; i++) {
+							stroke(random(360), 30);
+							strokeWeight(random(1, 2));
+							point(
+								p.pos.x + random(-sw / 2, sw / 2),
+								p.pos.y + random(-sw / 2, sw / 2),
+							);
+						}
+					}
 
 					if (id % 20 == 0) {
 						// Line points conn
@@ -174,14 +197,22 @@ function draw() {
 								partConn[idx].x,
 								partConn[idx].y,
 							);
+							strokeWeight(random(1, 20));
 							circle(
 								partConn[idx].x,
 								partConn[idx].y,
 								random(5, 10),
 							);
-
-							strokeWeight(1);
-							stroke(random(360), random(10, 50));
+							let sw = random(1, 100);
+							strokeWeight(1, 100);
+							let alp = map(
+								sw,
+								1,
+								100,
+								random(10, 50),
+								random(5, 10),
+							);
+							stroke(random(360), alp);
 							circle(
 								partConn[idx].x,
 								partConn[idx].y,
@@ -211,6 +242,11 @@ function draw() {
 					noStroke();
 					rectMode(CENTER);
 					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100));
+					if(bicol && frameCount % 250 > 30 && frameCount % 250 < 100){
+						// Verrrrr 30 = 0% 45 = 100% 60 = 0%
+						let lerp = lerpColor(monocromo,monocromo2,frameCount / 250);
+						stroke(lerp, b, map(sin(a), -1, 1, 40, 100));
+					}
 					let sz = map(sin(a * sinvel), -1, 1, 5, maxRectSz);
 					let szr = map(sin(a * sinvel), -1, 1, 0, maxRectSz);
 					if (rectr < 0.5) {
@@ -262,12 +298,20 @@ function render() {
 	let varh = random(0, 100);
 	let partBX = random(0, 700);
 	let partBY = random(0, 700);
-	if (partShape < 0.33) {
+	if (partShape < 0.45) {
 		for (let i = 0; i < numPart; i++) {
-			let p = new Particle(0, random(-varh, varh));
+			let x = 0;
+			if(partBif){
+				if(i % 3 == 0){
+					x = partBifDist / 2;
+				}else{
+					x = -partBifDist / 2;
+				}
+			}
+			let p = new Particle(x, random(-varh, varh));
 			particles.push(p);
 		}
-	} else if (partShape < 0.66) {
+	} else if (partShape < 0.55) {
 		for (let x = -width / 2 + partBX; x < width / 2 - partBX; x += 100) {
 			for (
 				let y = -height / 2 + partBY;
@@ -282,8 +326,19 @@ function render() {
 		let ang = TAU / 255;
 		let rad = random(100, 950);
 		for (let i = 0; i < numPart; i++) {
-			let x = cos(ang * i) * rad;
-			let y = sin(ang * i) * rad;
+			let d = 0;
+			// If bif change rad
+			let r = 1;
+			if(partBif){
+				if(i % 3 == 0){
+					d = partBifDist / 2;
+					r = 0.3;
+				}else{
+					d = -partBifDist / 2;
+				}
+			}
+			let x = cos(ang * i) * rad * r + d;
+			let y = sin(ang * i) * rad * r + d;
 			let p = new Particle(x, y);
 			particles.push(p);
 		}
@@ -300,31 +355,31 @@ function render() {
 	}
 	overlay.style.display = "none";
 }
-function bgNoise() {
-	let maxr = random(50, 120);
-	let d = pixelDensity();
-	pbgNoise.clear();
-	pbgNoise.background(0, 0, 0, 0);
-	pbgNoise.loadPixels();
-	for (let x = 0; x < pbgNoise.width; x += 1) {
-		for (let y = 0; y < pbgNoise.height; y += 1) {
-			let index =
-				4 *
-				((x * d + int(random(5))) * (pbgNoise.width * d) +
-					(y * d + int(random(5))));
-			// loop over
-			pbgNoise.pixels[index] =
-				pbgNoise.pixels[index + 1] =
-				pbgNoise.pixels[index + 2] =
-					int(random(256));
-			pbgNoise.pixels[index + 3] = int(
-				map(x, 0, pbgNoise.width, 0, random(10, maxr)),
-			);
-		}
-	}
-	pbgNoise.updatePixels();
-	image(pbgNoise, 0, 0);
-}
+// function bgNoise() {
+// 	let maxr = random(50, 120);
+// 	let d = pixelDensity();
+// 	pbgNoise.clear();
+// 	pbgNoise.background(0, 0, 0, 0);
+// 	pbgNoise.loadPixels();
+// 	for (let x = 0; x < pbgNoise.width; x += 1) {
+// 		for (let y = 0; y < pbgNoise.height; y += 1) {
+// 			let index =
+// 				4 *
+// 				((x * d + int(random(5))) * (pbgNoise.width * d) +
+// 					(y * d + int(random(5))));
+// 			// loop over
+// 			pbgNoise.pixels[index] =
+// 				pbgNoise.pixels[index + 1] =
+// 				pbgNoise.pixels[index + 2] =
+// 					int(random(256));
+// 			pbgNoise.pixels[index + 3] = int(
+// 				map(x, 0, pbgNoise.width, 0, random(10, maxr)),
+// 			);
+// 		}
+// 	}
+// 	pbgNoise.updatePixels();
+// 	image(pbgNoise, 0, 0);
+// }
 
 function bgNoise2() {
 	pbgNoise.clear();
@@ -338,37 +393,37 @@ function bgNoise2() {
 	}
 	image(pbgNoise, 0, 0);
 }
-function sliceCanvas(_slice) {
-	push();
-	imageMode(CORNER);
-	noSmooth();
-	const num = int(random(1, 5));
-	let imgs = [];
+// function sliceCanvas(_slice) {
+// 	push();
+// 	imageMode(CORNER);
+// 	noSmooth();
+// 	const num = int(random(1, 5));
+// 	let imgs = [];
 
-	for (let s = 0; s < num; s++) {
-		let img;
-		if (_slice == "X") {
-			img = get((s * width) / num, 0, width / num, height);
-		} else {
-			// Y default
-			img = get(0, (s * height) / num, width, height / num);
-		}
-		imgs.push(img);
-	}
-	let rimg = imgs.sort((a, b) => 0.5 - random(1));
-	setShadow(0, 10, 20, 50);
-	for (let i = 0; i < num; i++) {
-		noFill();
-		if (_slice == "X") {
-			let rpos = 0;
-			image(rimg[i], int(width / num) * i + rpos, 0);
-		} else {
-			let rpos = 0;
-			image(rimg[i], 0, int(height / num) * i + rpos);
-		}
-	}
-	pop();
-}
+// 	for (let s = 0; s < num; s++) {
+// 		let img;
+// 		if (_slice == "X") {
+// 			img = get((s * width) / num, 0, width / num, height);
+// 		} else {
+// 			// Y default
+// 			img = get(0, (s * height) / num, width, height / num);
+// 		}
+// 		imgs.push(img);
+// 	}
+// 	let rimg = imgs.sort((a, b) => 0.5 - random(1));
+// 	setShadow(0, 10, 20, 50);
+// 	for (let i = 0; i < num; i++) {
+// 		noFill();
+// 		if (_slice == "X") {
+// 			let rpos = 0;
+// 			image(rimg[i], int(width / num) * i + rpos, 0);
+// 		} else {
+// 			let rpos = 0;
+// 			image(rimg[i], 0, int(height / num) * i + rpos);
+// 		}
+// 	}
+// 	pop();
+// }
 function rotateAll(r = 8) {
 	translate(width / 2, height / 2);
 	rotate((int(random(r)) * TAU) / r);
@@ -469,7 +524,7 @@ class Particle {
 		this.maxMarg = random(100, 300);
 		this.a = 0;
 		this.dir = createVector(0, 0);
-		this.off = random(0, 0.2);
+		this.off = 0;
 		this.mult = 0.7;
 		this.n = 0;
 		this.ns = 0.001;
