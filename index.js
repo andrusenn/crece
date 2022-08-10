@@ -74,7 +74,7 @@ function setup() {
 	//
 	partCirc = boolean(int(random(2)));
 	partBif = boolean(int(random(2)));
-	partBifDist = random(200,800);
+	partBifDist = random(200, 800);
 
 	// Slice width
 	sliaceW = random(50, 1000);
@@ -95,6 +95,16 @@ function setup() {
 	noFill();
 }
 function draw() {
+	push();
+	// if (frameCount > 80 && frameCount < 90) {
+	// 	translate(width / 2, height / 2);
+	// 	if (random() < 0.5) {
+	// 		scale(0.5);
+	// 	} else {
+	// 		scale(2);
+	// 	}
+	// 	translate(-width / 2, -height / 2);
+	// }
 	noSmooth();
 	for (let i = 0; i < 3; i++) {
 		push();
@@ -150,7 +160,7 @@ function draw() {
 			pop();
 			// Render ---------------------------------------------------
 			if (p.render) {
-				setShadow(0, 15, 15, 100);
+				setShadow(0, 15, 15, 60);
 				// bright
 				let b = map(frameCount, 0, 250, bright, 0);
 				if (bw < 0.2) {
@@ -161,9 +171,30 @@ function draw() {
 
 					// Main Points
 					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100), 100);
-					if(bicol && frameCount % 250 > 30 && frameCount % 250 < 100){
-						let lerp = lerpColor(monocromo,monocromo2,frameCount / 250);
-						stroke(lerp, b, map(sin(a), -1, 1, 40, 100), 100);
+					if (
+						bicol &&
+						frameCount % 250 > 30 &&
+						frameCount % 250 < 100
+					) {
+						let amt = constrain(
+							map(frameCount, 30, 100, 0, 1),
+							0,
+							1,
+						);
+						let c1 = color(
+							monocromo,
+							b,
+							map(sin(a), -1, 1, 40, 100),
+							100,
+						);
+						let c2 = color(
+							monocromo2,
+							b,
+							map(sin(a), -1, 1, 40, 100),
+							100,
+						);
+						let lerp = lerpColor(c1, c2, amt);
+						stroke(lerp);
 					}
 					let sw = 10;
 					if (id % 50 == 0) {
@@ -242,10 +273,30 @@ function draw() {
 					noStroke();
 					rectMode(CENTER);
 					stroke(monocromo, b, map(sin(a), -1, 1, 40, 100));
-					if(bicol && frameCount % 250 > 30 && frameCount % 250 < 100){
-						// Verrrrr 30 = 0% 45 = 100% 60 = 0%
-						let lerp = lerpColor(monocromo,monocromo2,frameCount / 250);
-						stroke(lerp, b, map(sin(a), -1, 1, 40, 100));
+					if (
+						bicol &&
+						frameCount % 250 > 30 &&
+						frameCount % 250 < 100
+					) {
+						let amt = constrain(
+							map(frameCount, 30, 100, 0, 1),
+							0,
+							1,
+						);
+						let c1 = color(
+							monocromo,
+							b,
+							map(sin(a), -1, 1, 40, 100),
+							100,
+						);
+						let c2 = color(
+							monocromo2,
+							b,
+							map(sin(a), -1, 1, 40, 100),
+							100,
+						);
+						let lerp = lerpColor(c1, c2, amt);
+						stroke(lerp);
 					}
 					let sz = map(sin(a * sinvel), -1, 1, 5, maxRectSz);
 					let szr = map(sin(a * sinvel), -1, 1, 0, maxRectSz);
@@ -269,6 +320,7 @@ function draw() {
 		});
 		pop();
 	}
+	pop();
 	if (frameCount > 250) {
 		noLoop();
 		if (!isFxpreview) {
@@ -277,6 +329,10 @@ function draw() {
 	}
 }
 function render() {
+	// push()
+	// translate(width/2,height/2);
+	// scale(1.6);
+	// translate(-width/2,-height/2);
 	randomSeed(seed);
 	noiseSeed(seed);
 	// background
@@ -294,17 +350,17 @@ function render() {
 	rotateAll(4);
 
 	particles = [];
-	numPart = random(200, 350);
+	numPart = random(100, 220);
 	let varh = random(0, 100);
 	let partBX = random(0, 700);
 	let partBY = random(0, 700);
 	if (partShape < 0.45) {
 		for (let i = 0; i < numPart; i++) {
 			let x = 0;
-			if(partBif){
-				if(i % 3 == 0){
+			if (partBif) {
+				if (i % 3 == 0) {
 					x = partBifDist / 2;
-				}else{
+				} else {
 					x = -partBifDist / 2;
 				}
 			}
@@ -329,11 +385,11 @@ function render() {
 			let d = 0;
 			// If bif change rad
 			let r = 1;
-			if(partBif){
-				if(i % 3 == 0){
+			if (partBif) {
+				if (i % 3 == 0) {
 					d = partBifDist / 2;
 					r = 0.3;
-				}else{
+				} else {
 					d = -partBifDist / 2;
 				}
 			}
@@ -353,6 +409,7 @@ function render() {
 		);
 		partConn.push(conn);
 	}
+	// pop();
 	overlay.style.display = "none";
 }
 // function bgNoise() {
