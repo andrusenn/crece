@@ -6,6 +6,8 @@ Andrés Senn
 */
 let overlay;
 let loaded = false;
+let laps = 2;
+let lap = 0;
 let seed;
 let particles;
 let numPart; // Particles amount
@@ -13,14 +15,14 @@ let partConn = [];
 let partConnSz;
 let partBif, partBifDist;
 let gbg; // Background
-let rot;
+let gbgDo; // Background
+let rot, rerot;
 let id = 0;
 let sinvel;
 let llen;
 let whench;
 let rectr;
 let monocromo, monocromo2;
-let bicol;
 let bright;
 let sat = 0;
 let maxRectSz;
@@ -28,7 +30,44 @@ let bw; // black & white
 let partShape;
 let maxMinp;
 let maxMainp;
-let limitf = 270;
+let limitf = 240;
+
+// Bicolor palette
+let isbicolor = false;
+let bicoloridx = 0;
+let bicolor = [
+	// [175,0],
+	// [330,175],
+	// [0,330],
+	// [0,175]
+	// ----------------
+	[0, 60],
+	[60, 0],
+	[60, 180],
+	[180, 60],
+	[205, 165],
+	[165, 205],
+	[0, 205],
+	[205, 0],
+	[60, 285],
+	[285, 60],
+	[205, 305],
+	[305, 205],
+	[0, 280],
+	[280, 0],
+	[60, 320],
+	[320, 60],
+	[205, 180],
+	[180, 205],
+	[0, 305],
+	[305, 0],
+	[60, 205],
+	[205, 60],
+	[0, 180],
+	[180, 0],
+	[285, 180],
+	[180, 285],
+];
 // Part circ
 let partCirc;
 
@@ -58,15 +97,17 @@ function setup() {
 	// noLoop();
 	colorMode(HSB, 360, 100, 100, 100);
 	pbgNoise = createGraphics(width, height);
-	monocromo = int(random(360) + 50) % 360;
-	monocromo2 = int(random(360) + 80) % 360;
-	bicol = false;//boolean(int(random(2)));
+	monocromo = bicolor[int(random(bicolor.length))][int(random(2))];
+	monocromo2 = bicolor[int(random(bicolor.length))][int(random(2))];
+	isbicolor = false; //boolean(int(random(2)));
+	bicoloridx = int(random(bicolor.length));
 	bright = 100;
 	rot = int(random(4)) * HALF_PI;
+	rerot = floor(random(1,9)) * HALF_PI/2;
 	sinvel = random(1, 3);
 	llen = random(0.5, 5);
 	whench = random(20, 80);
-	maxRectSz = random(80, 200);
+	maxRectSz = random(80, 500);
 	rectr = random(2.0) % 1.0;
 	bw = random();
 	partShape = random();
@@ -74,6 +115,8 @@ function setup() {
 	maxMainp = random(10, 50);
 	maxMinp = random(5, 20);
 	gbg = 0;
+	gbgDo = random();
+	laps = 2;
 	//
 	partCirc = boolean(int(random(2)));
 	partBif = boolean(int(random(2)));
@@ -99,6 +142,11 @@ function setup() {
 }
 function draw() {
 	push();
+	if (lap == 1) {
+		translate(width / 2, height / 2);
+		rotate(rot + rerot);
+		translate(-width / 2, -height / 2);
+	}
 	// if (frameCount > 80 && frameCount < 90) {
 	// 	translate(width / 2, height / 2);
 	// 	if (random() < 0.5) {
@@ -140,7 +188,7 @@ function draw() {
 							monocromo,
 							sat,
 							map(sin(a * 5), -1, 1, 20, 100),
-							map(sin(a * 2), -1, 1, 0, 5),
+							map(sin(a * 2), -1, 1, 0, 2),
 						);
 						circle(0, 0, map(sin(a * 2), -1, 1, diamMin, diamMax));
 					}
@@ -164,35 +212,18 @@ function draw() {
 			// Render ---------------------------------------------------
 			if (p.render) {
 				setShadow(0, 15, 15, 60);
-				let B = map(frameCount, 0, limitf, 40, 100);
+				// let B = map(frameCount, 0, limitf, 40, 100);
+				let B = map(sin(a * 1.5), -1, 1, 0, 100);
 				if (gbg > 200) {
 					B = map(sin(a * 2), -1, 1, 40, 100);
 				}
 				let S = map(frameCount, 0, limitf, bright, 50);
 				if (bw < 0.2) {
 					S = 0;
-					B = map(sin(a * 1.5), -1, 1, 0, 100);
 				}
 				if (frameCount > whench) {
-					//noFill();
-
-					// Main Points
-					stroke(monocromo, S, B, 100);
-					if (
-						bicol &&
-						frameCount % limitf > limitf * 0.12 &&
-						frameCount % limitf < limitf * 0.6
-					) {
-						// let amt = constrain(
-						// 	map(frameCount, 30, 150, 0, 1),
-						// 	0,
-						// 	1,
-						// );
-						// let c1 = color(monocromo, S, B, 100);
-						// let c2 = color(monocromo2, S, B, 100);
-						// let lerp = lerpColor(c1, c2, amt);
-						stroke(monocromo2, S, B, 100);
-					}
+					// POINTS --------------------------------------
+					// Sizes
 					let swp = map(frameCount / limitf, 0, 1, 1, 0.7);
 					let sw = 10;
 					if (id % 50 == 0) {
@@ -201,6 +232,24 @@ function draw() {
 					strokeWeight(
 						map(sin(a * sinvel), -1, 1, 1 * swp, sw * swp),
 					);
+					// Main Points
+					stroke(monocromo, 0, B, 100);
+					if (
+						isbicolor
+						// &&
+						// frameCount % limitf > limitf * 0.12 &&
+						// frameCount % limitf < limitf * 0.6
+					) {
+						// let amt = constrain(
+						// 	map(frameCount, limitf * 0.12, limitf * 0.6, 0, 1),
+						// 	0,
+						// 	1,
+						// );
+						// let c1 = color(bicolor[][0], S, B, 100);
+						// let c2 = color(monocromo2, S, B, 100);
+						// let lerp = lerpColor(c1, c2, amt);
+						stroke(monocromo2, S, B, 100);
+					}
 					point(p.pos.x, p.pos.y);
 
 					if (id % 50 == 0) {
@@ -268,7 +317,7 @@ function draw() {
 						strokeWeight(random(1, maxMinp));
 						stroke(int(random(2)) * 360, random(20, 60));
 						point(p.pos.x + addx, p.pos.y + addy);
-					} 
+					}
 					// Light shine
 					setShadow(0, 0, 0, 0);
 					stroke(255, 30);
@@ -277,34 +326,36 @@ function draw() {
 						map(sin(a * sinvel), -1, 1, 0.2 * swp, sw * 0.2 * swp),
 					);
 				} else {
+					// RECTS --------------------------------------
 					noStroke();
 					rectMode(CENTER);
-					stroke(monocromo, S, map(sin(a), -1, 1, 40, 100));
-					if (
-						bicol &&
-						frameCount % limitf > limitf * 0.12 &&
-						frameCount % limitf < limitf * 0.6
-					) {
-						// let amt = constrain(
-						// 	map(frameCount, 30, 150, 0, 1),
-						// 	0,
-						// 	1,
-						// );
-						// let c1 = color(
-						// 	monocromo,
-						// 	S,
-						// 	map(sin(a), -1, 1, 40, 100),
-						// 	100,
-						// );
-						// let c2 = color(
-						// 	monocromo2,
-						// 	S,
-						// 	map(sin(a), -1, 1, 40, 100),
-						// 	100,
-						// );
-						// let lerp = lerpColor(c1, c2, amt);
-						stroke(monocromo2, S, map(sin(a), -1, 1, 40, 100), 100);
-					}
+					stroke(monocromo, S, B, 100);
+					// if (
+					// 	isbicolor
+					// 	// &&
+					// 	// frameCount % limitf > limitf * 0.12 &&
+					// 	// frameCount % limitf < limitf * 0.6
+					// ) {
+					// 	// let amt = constrain(
+					// 	// 	map(frameCount, 30, 150, 0, 1),
+					// 	// 	0,
+					// 	// 	1,
+					// 	// );
+					// 	// let c1 = color(
+					// 	// 	monocromo,
+					// 	// 	S,
+					// 	// 	map(sin(a), -1, 1, 40, 100),
+					// 	// 	100,
+					// 	// );
+					// 	// let c2 = color(
+					// 	// 	monocromo2,
+					// 	// 	S,
+					// 	// 	map(sin(a), -1, 1, 40, 100),
+					// 	// 	100,
+					// 	// );
+					// 	// let lerp = lerpColor(c1, c2, amt);
+					// 	stroke(monocromo2, S, map(sin(a), -1, 1, 40, 100), 100);
+					// }
 					let sz = map(sin(a * sinvel), -1, 1, 5, maxRectSz);
 					let szr = map(sin(a * sinvel), -1, 1, 0, maxRectSz);
 					if (rectr < 0.5) {
@@ -312,14 +363,14 @@ function draw() {
 					}
 					if (id % 3 == 0) {
 						// Dots
-						strokeWeight(random(1, 6));
+						strokeWeight(random(1, 3));
 						stroke(int(random(2)) * 360, random(20, 60));
 						point(
-							p.pos.x + random(-20, 20),
-							p.pos.y + random(-20, 20),
+							p.pos.x + random(-100, 100),
+							p.pos.y + random(-100, 100),
 						);
 					}
-					strokeWeight(0.6);
+					strokeWeight(random(0.6, 1.6));
 					rect(p.pos.x, p.pos.y, sz, sz, szr, 0, szr, 0);
 				}
 				id++;
@@ -329,14 +380,23 @@ function draw() {
 	}
 	pop();
 	if (frameCount > limitf) {
-		noLoop();
-		// frameCount = 0;
-		// clear();
-		if (!isFxpreview) {
-			fxpreview();
+		//noLoop();
+		frameCount = 0;
+		particles.forEach((p) => {
+			p.reset();
+		});
+		particles = particles.filter((e) => {
+			return random() < 0.5;
+		});
+		maxRectSz = maxRectSz * 0.2;
+		lap++;
+
+		if (lap == laps) {
+			noLoop();
+			if (!isFxpreview) {
+				fxpreview();
+			}
 		}
-		// render();
-		// loop();
 	}
 }
 function render() {
@@ -347,9 +407,15 @@ function render() {
 	randomSeed(seed);
 	noiseSeed(seed);
 	// background
-	if (random() < 0.1) {
+	if (gbgDo < 0.2) {
 		gbg = 255;
 	}
+	if (gbgDo < 0.4) {
+		gbg = color(monocromo2, 100, 20);
+	}
+	// if (bw < 0.2 && gbgDo < 0.2) {
+	// 	gbg = color(monocromo, 100, 20);
+	// }
 	background(gbg);
 	rotateAll(4);
 
@@ -365,8 +431,10 @@ function render() {
 	rotateAll(4);
 
 	particles = [];
-	numPart = random(100, 220);
-	let varh = random(0, 100);
+	numPart = random(150, 220);
+
+	// Create particles ----------------------
+	let varh = random(150, 400);
 	let partBX = random(0, 700);
 	let partBY = random(0, 700);
 	if (partShape < 0.45) {
@@ -380,6 +448,9 @@ function render() {
 				}
 			}
 			let p = new Particle(x, random(-varh, varh));
+			p.mult = random(0.6, 0.8);
+			p.maxDil = 1; //random(10,100);
+			p.offc = random(0.0, 0.001);
 			particles.push(p);
 		}
 	} else if (partShape < 0.55) {
@@ -390,6 +461,9 @@ function render() {
 				y += 100
 			) {
 				let p = new Particle(x, y);
+				p.mult = random(0.6, 0.8);
+				p.maxDil = 1; //random(10,100);
+				p.offc = random(0.0, 0.001);
 				particles.push(p);
 			}
 		}
@@ -411,6 +485,9 @@ function render() {
 			let x = cos(ang * i) * rad * r + d;
 			let y = sin(ang * i) * rad * r + d;
 			let p = new Particle(x, y);
+			p.mult = random(0.6, 0.8);
+			p.maxDil = 1; //random(10,100);
+			p.offc = random(0.0, 0.001);
 			particles.push(p);
 		}
 	}
@@ -527,23 +604,19 @@ function bgRect() {
 
 function keyPressed() {
 	switch (key) {
-		case "0":
-			overlay.style.display = "flex";
-			clear();
-			pixelDensity(0.6);
-			frameCount = 0;
-			break;
 		case "1":
 			overlay.style.display = "flex";
 			clear();
 			pixelDensity(1);
 			frameCount = 0;
+			lap = 0;
 			break;
 		case "2":
 			overlay.style.display = "flex";
 			clear();
 			pixelDensity(2);
 			frameCount = 0;
+			lap = 0;
 			break;
 	}
 }
@@ -597,6 +670,7 @@ class Particle {
 		this.vel = createVector(0, 0);
 		this.minMarg = 50;
 		this.maxMarg = random(100, 300);
+		this.maxDil = 10;
 		this.a = 0;
 		this.dir = createVector(0, 0);
 		this.off = 0;
@@ -610,9 +684,11 @@ class Particle {
 	update() {
 		this.n = noise(this.pos.x * this.ns, this.pos.y * this.ns, this.off);
 		this.ns = map(this.n, 0, 1, 0.0008, 0.001);
-		let dil = map(sin(this.n * TAU), 0, 1, 5, 10);
+		let dil = map(sin(this.n * TAU), 0, 1, 5, this.maxDil);
 		//if (this.count % 20 == 0) {
-		this.a = this.n * TAU * dil;
+		let fa = this.n * TAU * dil;
+		let s = map(this.n * 8, 0, 1, 8, 0.5);
+		this.a = round(fa / s) * s;
 		this.dir.x = cos(this.a);
 		this.dir.y = sin(this.a);
 		//}
@@ -636,5 +712,8 @@ class Particle {
 		} else {
 			this.render = true;
 		}
+	}
+	reset() {
+		this.pos.set(this.ipos);
 	}
 }
