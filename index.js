@@ -4,132 +4,67 @@ Estados en monocromo.
 
 Andrés Senn
 */
-let overlay;
-let loaded = false;
-let laps = 2;
-let lap = 0;
-let seed;
-let particles;
-let numPart; // Particles amount
-let partConn = [];
-let partConnSz;
-let partBif, partBifDist;
-let gbg; // Background
-let gbgDo; // Background
-let rot, rerot;
-let id = 0;
-let sinvel;
-let llen;
-let whench;
-let rectr;
-let monocromo, monocromo2;
-let bright;
-let sat = 0;
-let maxRectSz;
-let bw; // black & white
-let partShape;
-let maxMinp;
-let maxMainp;
-let limitf = 240;
-
-// Bicolor palette
-let isbicolor = false;
-let bicoloridx = 0;
-let bicolor = [
-	// [175,0],
-	// [330,175],
-	// [0,330],
-	// [0,175]
-	// ----------------
-	[0, 60],
-	[60, 0],
-	[60, 180],
-	[180, 60],
-	[205, 165],
-	[165, 205],
-	[0, 205],
-	[205, 0],
-	[60, 285],
-	[285, 60],
-	[205, 305],
-	[305, 205],
-	[0, 280],
-	[280, 0],
-	[60, 320],
-	[320, 60],
-	[205, 180],
-	[180, 205],
-	[0, 305],
-	[305, 0],
-	[60, 205],
-	[205, 60],
-	[0, 180],
-	[180, 0],
-	[285, 180],
-	[180, 285],
-];
-// Part circ
-let partCirc;
-
-// Slice
-let sliaceW = 0;
-
-// circles
-let iscircl;
-let diamMin, diamMax;
-
-// Noise
-let pbgNoise;
-
-// Sizes
-// let DEFSIZE = 2160;
-// let CS = Math.min(window.innerWidth,window.innerHeight);
-// let RZ = CS / DEFSIZE;
+let overlay,
+	loaded = false,
+	laps = 2,
+	lap = 0,
+	seed,
+	particles,
+	numPart, // Particles amount
+	partConn = [],
+	partConnSz,
+	partBif,
+	partBifDist,
+	gbg, // Background,
+	gbgDo, // Background,
+	rot,
+	rerot,
+	id = 0,
+	sinvel,
+	llen,
+	whench,
+	rectr,
+	monocromo,
+	monocromo2,
+	bright,
+	sat = 0,
+	maxRectSz,
+	bw, // black or white,
+	partShape,
+	maxMinp,
+	maxMainp,
+	limitf = 240,
+	// palettes
+	idxcolor,
+	bgcolors = [0, 0, 290, 200, 320], // 0/190 - 0/60 - 290 / 60 -200/190 - 320/180
+	fgcolors = [190, 60, 60, 190, 180],
+	// Part circ
+	partCirc,
+	// Slice
+	sliaceW = 0,
+	// circles
+	iscircl,
+	diamMin,
+	diamMax,
+	// Noise
+	pbgNoise;
 
 function setup() {
 	seed = int(fxrand() * 1111111191111111);
 	overlay = document.querySelector(".overlay");
 	let cv = createCanvas(2160, 2160);
-	cv.id("monocromo");
-	pixelDensity(1);
-	randomSeed(seed);
-	noiseSeed(seed);
-	// noLoop();
-	colorMode(HSB, 360, 100, 100, 100);
 	pbgNoise = createGraphics(width, height);
-	monocromo = bicolor[int(random(bicolor.length))][int(random(2))];
-	monocromo2 = bicolor[int(random(bicolor.length))][int(random(2))];
-	isbicolor = false; //boolean(int(random(2)));
-	bicoloridx = int(random(bicolor.length));
-	bright = 100;
-	rot = int(random(4)) * HALF_PI;
-	rerot = floor(random(1,9)) * HALF_PI/2;
-	sinvel = random(1, 3);
-	llen = random(0.5, 5);
-	whench = random(20, 80);
-	maxRectSz = random(80, 500);
-	rectr = random(2.0) % 1.0;
-	bw = random();
-	partShape = random();
-	partConnSz = random(0.1, 1);
-	maxMainp = random(10, 50);
-	maxMinp = random(5, 20);
-	gbg = 0;
-	gbgDo = random();
-	laps = 2;
-	//
-	partCirc = boolean(int(random(2)));
-	partBif = boolean(int(random(2)));
-	partBifDist = random(200, 800);
+	cv.id("monocromo");
 
-	// Slice width
-	sliaceW = random(50, 1000);
-	// circles
-	iscircl = random();
-	diamMin = random(10, 50);
-	diamMax = random(80, 400);
+	// Pixel density param
+	const uparams = getURLParams();
+	if (uparams.pd) {
+		pixelDensity(float(uparams.pd));
+	} else {
+		pixelDensity(1);
+	}
 
-	rectMode(CENTER);
+	colorMode(HSB, 360, 100, 100, 100);
 
 	render();
 
@@ -141,21 +76,14 @@ function setup() {
 	noFill();
 }
 function draw() {
+	randomSeed(seed);
+	noiseSeed(seed);
 	push();
 	if (lap == 1) {
 		translate(width / 2, height / 2);
 		rotate(rot + rerot);
 		translate(-width / 2, -height / 2);
 	}
-	// if (frameCount > 80 && frameCount < 90) {
-	// 	translate(width / 2, height / 2);
-	// 	if (random() < 0.5) {
-	// 		scale(0.5);
-	// 	} else {
-	// 		scale(2);
-	// 	}
-	// 	translate(-width / 2, -height / 2);
-	// }
 	noSmooth();
 	for (let i = 0; i < 3; i++) {
 		push();
@@ -213,7 +141,7 @@ function draw() {
 			if (p.render) {
 				setShadow(0, 15, 15, 60);
 				// let B = map(frameCount, 0, limitf, 40, 100);
-				let B = map(sin(a * 1.5), -1, 1, 0, 100);
+				let B = map(sin(a * 2), -1, 1, 0, 100);
 				if (gbg > 200) {
 					B = map(sin(a * 2), -1, 1, 40, 100);
 				}
@@ -234,22 +162,22 @@ function draw() {
 					);
 					// Main Points
 					stroke(monocromo, 0, B, 100);
-					if (
-						isbicolor
-						// &&
-						// frameCount % limitf > limitf * 0.12 &&
-						// frameCount % limitf < limitf * 0.6
-					) {
-						// let amt = constrain(
-						// 	map(frameCount, limitf * 0.12, limitf * 0.6, 0, 1),
-						// 	0,
-						// 	1,
-						// );
-						// let c1 = color(bicolor[][0], S, B, 100);
-						// let c2 = color(monocromo2, S, B, 100);
-						// let lerp = lerpColor(c1, c2, amt);
-						stroke(monocromo2, S, B, 100);
-					}
+					// if (
+					// 	isbicolor
+					// 	// &&
+					// 	// frameCount % limitf > limitf * 0.12 &&
+					// 	// frameCount % limitf < limitf * 0.6
+					// ) {
+					// 	// let amt = constrain(
+					// 	// 	map(frameCount, limitf * 0.12, limitf * 0.6, 0, 1),
+					// 	// 	0,
+					// 	// 	1,
+					// 	// );
+					// 	// let c1 = color(bicolor[][0], S, B, 100);
+					// 	// let c2 = color(monocromo2, S, B, 100);
+					// 	// let lerp = lerpColor(c1, c2, amt);
+					// 	stroke(monocromo2, S, B, 100);
+					// }
 					point(p.pos.x, p.pos.y);
 
 					if (id % 50 == 0) {
@@ -330,32 +258,6 @@ function draw() {
 					noStroke();
 					rectMode(CENTER);
 					stroke(monocromo, S, B, 100);
-					// if (
-					// 	isbicolor
-					// 	// &&
-					// 	// frameCount % limitf > limitf * 0.12 &&
-					// 	// frameCount % limitf < limitf * 0.6
-					// ) {
-					// 	// let amt = constrain(
-					// 	// 	map(frameCount, 30, 150, 0, 1),
-					// 	// 	0,
-					// 	// 	1,
-					// 	// );
-					// 	// let c1 = color(
-					// 	// 	monocromo,
-					// 	// 	S,
-					// 	// 	map(sin(a), -1, 1, 40, 100),
-					// 	// 	100,
-					// 	// );
-					// 	// let c2 = color(
-					// 	// 	monocromo2,
-					// 	// 	S,
-					// 	// 	map(sin(a), -1, 1, 40, 100),
-					// 	// 	100,
-					// 	// );
-					// 	// let lerp = lerpColor(c1, c2, amt);
-					// 	stroke(monocromo2, S, map(sin(a), -1, 1, 40, 100), 100);
-					// }
 					let sz = map(sin(a * sinvel), -1, 1, 5, maxRectSz);
 					let szr = map(sin(a * sinvel), -1, 1, 0, maxRectSz);
 					if (rectr < 0.5) {
@@ -380,6 +282,7 @@ function draw() {
 	}
 	pop();
 	if (frameCount > limitf) {
+		lap++;
 		//noLoop();
 		frameCount = 0;
 		particles.forEach((p) => {
@@ -388,9 +291,13 @@ function draw() {
 		particles = particles.filter((e) => {
 			return random() < 0.5;
 		});
-		maxRectSz = maxRectSz * 0.2;
-		lap++;
-
+		if (lap == 1) {
+			maxRectSz = maxRectSz * 0.2;
+			if (random() < 0.5) {
+				bw = 1;
+				monocromo = fgcolors[idxcolor];
+			}
+		}
 		if (lap == laps) {
 			noLoop();
 			if (!isFxpreview) {
@@ -400,27 +307,59 @@ function draw() {
 	}
 }
 function render() {
-	// push()
-	// translate(width/2,height/2);
-	// scale(1.6);
-	// translate(-width/2,-height/2);
 	randomSeed(seed);
 	noiseSeed(seed);
+	idxcolor = floor(random(fgcolors.length));
+	monocromo = fgcolors[idxcolor]; //(floor(random(360) / 20) * 20 + 80) % 360;
+	monocromo2 = bgcolors[idxcolor]; //(floor(random(360) / 20) * 20 + 40) % 360;
+	console.log(monocromo,monocromo2)
+	bright = 100;
+	rot = int(random(4)) * HALF_PI;
+	rerot = (floor(random(1, 9)) * HALF_PI) / 2;
+	sinvel = random(1, 3);
+	llen = random(0.5, 5);
+	whench = random(20, limitf * 0.6);
+	maxRectSz = random(80, 500);
+	rectr = random(2.0) % 1.0;
+	bw = 0; //random();
+	partShape = random(); // Line / Circle / square
+	partConnSz = random(0.1, 1);
+	maxMainp = random(10, 50);
+	maxMinp = random(5, 20);
+	gbg = 0; // default bg color
+	gbgDo = random();
+	laps = 2;
+	//
+	partCirc = boolean(int(random(3) - 1));
+	partBif = boolean(int(random(2)));
+	partBifDist = random(200, 800);
+
+	// Slice width
+	sliaceW = random(50, 1000);
+	// circles
+	iscircl = random();
+	diamMin = random(10, 50);
+	diamMax = random(80, 400);
+
+	rectMode(CENTER);
+
 	// background
-	if (gbgDo < 0.2) {
-		gbg = 255;
+	if (gbgDo < 0.66) {
+		gbg = 360;
 	}
-	if (gbgDo < 0.4) {
-		gbg = color(monocromo2, 100, 20);
-	}
-	// if (bw < 0.2 && gbgDo < 0.2) {
-	// 	gbg = color(monocromo, 100, 20);
-	// }
+
 	background(gbg);
+	if (gbgDo < 0.33) {
+		// gbg = color(monocromo2, 100, 30);
+		push();
+		rotateAll(4);
+		colorBg(color(monocromo2, 100, 100));
+		pop();
+	}
 	rotateAll(4);
 
 	// BG Noise
-	if (gbg > 200) {
+	if (gbg == 360) {
 		bgNoise2(4, 40);
 	} else {
 		bgNoise2();
@@ -494,6 +433,7 @@ function render() {
 
 	// Part conn
 	let partConnNum = random(2, 8);
+	partConn = [];
 	for (let i = 0; i < partConnNum; i++) {
 		let conn = createVector(
 			random(-width / 2, width / 2),
@@ -504,32 +444,16 @@ function render() {
 	// pop();
 	overlay.style.display = "none";
 }
-// function bgNoise() {
-// 	let maxr = random(50, 120);
-// 	let d = pixelDensity();
-// 	pbgNoise.clear();
-// 	pbgNoise.background(0, 0, 0, 0);
-// 	pbgNoise.loadPixels();
-// 	for (let x = 0; x < pbgNoise.width; x += 1) {
-// 		for (let y = 0; y < pbgNoise.height; y += 1) {
-// 			let index =
-// 				4 *
-// 				((x * d + int(random(5))) * (pbgNoise.width * d) +
-// 					(y * d + int(random(5))));
-// 			// loop over
-// 			pbgNoise.pixels[index] =
-// 				pbgNoise.pixels[index + 1] =
-// 				pbgNoise.pixels[index + 2] =
-// 					int(random(256));
-// 			pbgNoise.pixels[index + 3] = int(
-// 				map(x, 0, pbgNoise.width, 0, random(10, maxr)),
-// 			);
-// 		}
-// 	}
-// 	pbgNoise.updatePixels();
-// 	image(pbgNoise, 0, 0);
-// }
-
+function colorBg(c) {
+	fill(0);
+	noStroke();
+	let fi = drawingContext.createLinearGradient(-width * 0.6, 0, width, 0);
+	fi.addColorStop(0, c);
+	// fi.addColorStop(0.33, c);
+	fi.addColorStop(1, color(0));
+	drawingContext.fillStyle = fi;
+	rect(width / 2, height / 2, width, height);
+}
 function bgNoise2(amin = 5, amax = 20) {
 	pbgNoise.clear();
 	pbgNoise.background(0, 0, 0, 0);
@@ -545,37 +469,6 @@ function bgNoise2(amin = 5, amax = 20) {
 	}
 	image(pbgNoise, 0, 0);
 }
-// function sliceCanvas(_slice) {
-// 	push();
-// 	imageMode(CORNER);
-// 	noSmooth();
-// 	const num = int(random(1, 5));
-// 	let imgs = [];
-
-// 	for (let s = 0; s < num; s++) {
-// 		let img;
-// 		if (_slice == "X") {
-// 			img = get((s * width) / num, 0, width / num, height);
-// 		} else {
-// 			// Y default
-// 			img = get(0, (s * height) / num, width, height / num);
-// 		}
-// 		imgs.push(img);
-// 	}
-// 	let rimg = imgs.sort((a, b) => 0.5 - random(1));
-// 	setShadow(0, 10, 20, 50);
-// 	for (let i = 0; i < num; i++) {
-// 		noFill();
-// 		if (_slice == "X") {
-// 			let rpos = 0;
-// 			image(rimg[i], int(width / num) * i + rpos, 0);
-// 		} else {
-// 			let rpos = 0;
-// 			image(rimg[i], 0, int(height / num) * i + rpos);
-// 		}
-// 	}
-// 	pop();
-// }
 function rotateAll(r = 8) {
 	translate(width / 2, height / 2);
 	rotate((int(random(r)) * TAU) / r);
@@ -602,41 +495,48 @@ function bgRect() {
 	pop();
 }
 
-function keyPressed() {
-	switch (key) {
-		case "1":
-			overlay.style.display = "flex";
-			clear();
-			pixelDensity(1);
-			frameCount = 0;
-			lap = 0;
-			break;
-		case "2":
-			overlay.style.display = "flex";
-			clear();
-			pixelDensity(2);
-			frameCount = 0;
-			lap = 0;
-			break;
-	}
-}
+// function keyPressed() {
+// 	switch (key) {
+// 		case "1":
+// 			overlay.style.display = "flex";
+// 			clear();
+// 			pixelDensity(1);
+// 			break;
+// 		case "2":
+// 			overlay.style.display = "flex";
+// 			clear();
+// 			pixelDensity(2);
+// 			break;
+// 	}
+// }
 function keyReleased() {
 	switch (key) {
-		case "0":
-			render();
-			loop();
-			break;
 		case "1":
-			render();
-			loop();
+			doPD("1");
 			break;
 		case "2":
-			render();
-			loop();
+			doPD("2");
+			break;
+		case "3":
+			doPD("2.4");
 			break;
 	}
 	if (key == "s" || key == "S") {
 		grabImage();
+	}
+}
+function doPD(n) {
+	if (window.location.href.includes("?")) {
+		if (window.location.href.includes("pd")) {
+			window.location.href = window.location.href.replace(
+				/pd\=(.)+/gi,
+				"pd=" + encodeURI(n),
+			);
+		} else {
+			window.location.href = window.location.href + "&pd=" + encodeURI(n);
+		}
+	} else {
+		window.location.href = window.location.href + "?pd=" + encodeURI(n);
 	}
 }
 function grabImage() {
@@ -687,7 +587,7 @@ class Particle {
 		let dil = map(sin(this.n * TAU), 0, 1, 5, this.maxDil);
 		//if (this.count % 20 == 0) {
 		let fa = this.n * TAU * dil;
-		let s = map(this.n * 8, 0, 1, 8, 0.5);
+		let s = map(this.n * 8, 0, 1, 6, 0.5);
 		this.a = round(fa / s) * s;
 		this.dir.x = cos(this.a);
 		this.dir.y = sin(this.a);
