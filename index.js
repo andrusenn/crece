@@ -15,6 +15,7 @@ let overlay,
 	partConnSz,
 	partBif,
 	partBifDist,
+	psw = 10,
 	gbg, // Background,
 	gbgDo, // Background,
 	rot,
@@ -26,8 +27,9 @@ let overlay,
 	rectr,
 	monocromo,
 	monocromo2,
+	monocromo3,
 	bright,
-	sat = 0,
+	sat = 70,
 	maxRectSz,
 	bw, // black or white,
 	partShape,
@@ -35,9 +37,12 @@ let overlay,
 	maxMainp,
 	limitf = 240,
 	// palettes
+	palette = [
+		0, //Complementary
+	],
 	idxcolor,
-	bgcolors = [0, 0, 290, 200, 320], // 0/190 - 0/60 - 290 / 60 -200/190 - 320/180
-	fgcolors = [190, 60, 60, 190, 180],
+	bgcolors = [0, 0, 290, 200, 320, 320, 290], // 0/190 - 0/60 - 290 / 60 -200/190 - 320/180
+	fgcolors = [190, 60, 60, 190, 180, 290, 30],
 	// Part circ
 	partCirc,
 	// Slice
@@ -55,7 +60,6 @@ function setup() {
 	let cv = createCanvas(2160, 2160);
 	pbgNoise = createGraphics(width, height);
 	cv.id("monocromo");
-
 	// Pixel density param
 	const uparams = getURLParams();
 	if (uparams.pd) {
@@ -139,13 +143,14 @@ function draw() {
 			pop();
 			// Render ---------------------------------------------------
 			if (p.render) {
-				setShadow(0, 15, 15, 60);
+				let SH = map(sin(a * 5), -1, 1, 3, 30);
+				setShadow(0, SH, SH, 60);
 				// let B = map(frameCount, 0, limitf, 40, 100);
 				let B = map(sin(a * 2), -1, 1, 0, 100);
-				if (gbg > 200) {
-					B = map(sin(a * 2), -1, 1, 40, 100);
-				}
-				let S = map(frameCount, 0, limitf, bright, 50);
+				// if (gbg > 200) {
+				// 	B = map(sin(a * 2), -1, 1, 40, 100);
+				// }
+				let S = map(frameCount, sat, limitf, bright, 50);
 				if (bw < 0.2) {
 					S = 0;
 				}
@@ -153,7 +158,7 @@ function draw() {
 					// POINTS --------------------------------------
 					// Sizes
 					let swp = map(frameCount / limitf, 0, 1, 1, 0.7);
-					let sw = 10;
+					let sw = psw;
 					if (id % 50 == 0) {
 						sw = maxMainp;
 					}
@@ -211,14 +216,14 @@ function draw() {
 								partConn[idx].y,
 								random(5, 10),
 							);
-							let sw = random(1, 100);
-							strokeWeight(1, 100);
+							let sw = random(1, 10);
+							strokeWeight(sw);
 							let alp = map(
 								sw,
 								1,
-								100,
-								random(10, 50),
-								random(5, 10),
+								10,
+								random(5, 50),
+								random(2, 5),
 							);
 							stroke(random(360), alp);
 							circle(
@@ -248,7 +253,7 @@ function draw() {
 					}
 					// Light shine
 					setShadow(0, 0, 0, 0);
-					stroke(255, 30);
+					stroke(255, 50);
 					point(p.pos.x - 3, p.pos.y - 3);
 					strokeWeight(
 						map(sin(a * sinvel), -1, 1, 0.2 * swp, sw * 0.2 * swp),
@@ -258,6 +263,9 @@ function draw() {
 					noStroke();
 					rectMode(CENTER);
 					stroke(monocromo, S, B, 100);
+					if (lap == 1) {
+						stroke(monocromo, S * 0.3, B * 0.8, 100);
+					}
 					let sz = map(sin(a * sinvel), -1, 1, 5, maxRectSz);
 					let szr = map(sin(a * sinvel), -1, 1, 0, maxRectSz);
 					if (rectr < 0.5) {
@@ -284,19 +292,19 @@ function draw() {
 	if (frameCount > limitf) {
 		lap++;
 		//noLoop();
-		frameCount = 0;
+		frameCount = floor(limitf * random(0, 0.1));
 		particles.forEach((p) => {
 			p.reset();
 		});
-		particles = particles.filter((e) => {
-			return random() < 0.5;
+		const plength = particles.length;
+		particles = particles.filter((e, i) => {
+			return i < plength * random(0.3, 0.5);
 		});
 		if (lap == 1) {
-			maxRectSz = maxRectSz * 0.2;
-			if (random() < 0.5) {
-				bw = 1;
-				monocromo = fgcolors[idxcolor];
-			}
+			maxRectSz = maxRectSz * random(0.1, 0.2);
+			maxMainp = maxMainp * 0.5;
+			monocromo = monocromo3;
+			psw = 5;
 		}
 		if (lap == laps) {
 			noLoop();
@@ -310,9 +318,16 @@ function render() {
 	randomSeed(seed);
 	noiseSeed(seed);
 	idxcolor = floor(random(fgcolors.length));
-	monocromo = fgcolors[idxcolor]; //(floor(random(360) / 20) * 20 + 80) % 360;
-	monocromo2 = bgcolors[idxcolor]; //(floor(random(360) / 20) * 20 + 40) % 360;
-	console.log(monocromo,monocromo2)
+	// Colors ---------
+	monocromo = (floor(random(360) / 30) * 30) % 360; //(floor(random(360) / 20) * 20 + 80) % 360;
+	monocromo2 = (monocromo + 180) % 360; //bgcolors[idxcolor]; //(floor(random(360) / 20) * 20 + 40) % 360;
+	monocromo3 = monocromo;
+	if (random() < 0.5) {
+		monocromo2 = (monocromo + 30) % 360; //bgcolors[idxcolor]; //(floor(random(360) / 20) * 20 + 40) % 360;
+		monocromo3 = (monocromo - 30) % 360;
+	}
+	// ----------------
+	console.log(monocromo, monocromo2);
 	bright = 100;
 	rot = int(random(4)) * HALF_PI;
 	rerot = (floor(random(1, 9)) * HALF_PI) / 2;
@@ -339,31 +354,29 @@ function render() {
 	// circles
 	iscircl = random();
 	diamMin = random(10, 50);
-	diamMax = random(80, 400);
+	diamMax = random(150, 400);
 
 	rectMode(CENTER);
 
 	// background
-	if (gbgDo < 0.66) {
+	if (gbgDo < 0.6) {
 		gbg = 360;
 	}
 
 	background(gbg);
-	if (gbgDo < 0.33) {
+	if (gbgDo < 0.3) {
 		// gbg = color(monocromo2, 100, 30);
 		push();
 		rotateAll(4);
-		colorBg(color(monocromo2, 100, 100));
+		// if (random() < 0.5) {
+		colorBg(color(monocromo2, sat, 20));
+		// } else {
+		// 	colorBg(color(monocromo, 100, 20));
+		// }
 		pop();
 	}
 	rotateAll(4);
-
-	// BG Noise
-	if (gbg == 360) {
-		bgNoise2(4, 40);
-	} else {
-		bgNoise2();
-	}
+	bgNoise2();
 
 	setShadow(0, 20, 20, 100);
 
@@ -374,8 +387,8 @@ function render() {
 
 	// Create particles ----------------------
 	let varh = random(150, 400);
-	let partBX = random(0, 700);
-	let partBY = random(0, 700);
+	let partBX = random(400, 700);
+	let partBY = random(400, 700);
 	if (partShape < 0.45) {
 		for (let i = 0; i < numPart; i++) {
 			let x = 0;
@@ -388,27 +401,27 @@ function render() {
 			}
 			let p = new Particle(x, random(-varh, varh));
 			p.mult = random(0.6, 0.8);
-			p.maxDil = 1; //random(10,100);
+			p.maxDil = 1;
 			p.offc = random(0.0, 0.001);
 			particles.push(p);
 		}
 	} else if (partShape < 0.55) {
-		for (let x = -width / 2 + partBX; x < width / 2 - partBX; x += 100) {
+		for (let x = -width / 2 + partBX; x < width / 2 - partBX; x += 80) {
 			for (
 				let y = -height / 2 + partBY;
 				y < height / 2 - partBY;
-				y += 100
+				y += 80
 			) {
 				let p = new Particle(x, y);
 				p.mult = random(0.6, 0.8);
-				p.maxDil = 1; //random(10,100);
+				p.maxDil = 1;
 				p.offc = random(0.0, 0.001);
 				particles.push(p);
 			}
 		}
 	} else {
 		let ang = TAU / 255;
-		let rad = random(100, 950);
+		let rad = random(100, 900);
 		for (let i = 0; i < numPart; i++) {
 			let d = 0;
 			// If bif change rad
@@ -416,7 +429,7 @@ function render() {
 			if (partBif) {
 				if (i % 3 == 0) {
 					d = partBifDist / 2;
-					r = 0.3;
+					r = random(0.3, 0.5);
 				} else {
 					d = -partBifDist / 2;
 				}
@@ -425,7 +438,7 @@ function render() {
 			let y = sin(ang * i) * rad * r + d;
 			let p = new Particle(x, y);
 			p.mult = random(0.6, 0.8);
-			p.maxDil = 1; //random(10,100);
+			p.maxDil = 1;
 			p.offc = random(0.0, 0.001);
 			particles.push(p);
 		}
@@ -447,14 +460,19 @@ function render() {
 function colorBg(c) {
 	fill(0);
 	noStroke();
-	let fi = drawingContext.createLinearGradient(-width * 0.6, 0, width, 0);
+	let fi = drawingContext.createLinearGradient(
+		0,
+		0,
+		width,
+		random() * height,
+	);
 	fi.addColorStop(0, c);
-	// fi.addColorStop(0.33, c);
+	// fi.addColorStop(random(0.3, 0.5), color(0));
 	fi.addColorStop(1, color(0));
 	drawingContext.fillStyle = fi;
 	rect(width / 2, height / 2, width, height);
 }
-function bgNoise2(amin = 5, amax = 20) {
+function bgNoise2(amin = 5, amax = 10) {
 	pbgNoise.clear();
 	pbgNoise.background(0, 0, 0, 0);
 	for (let x = 0; x < pbgNoise.width; x += 4) {
@@ -580,14 +598,19 @@ class Particle {
 		this.offc = random(0.0, 0.002);
 		this.count = 0;
 		this.render = true;
+		this.constrain = random();
+		this.constrainAmt = 0.66;
 	}
 	update() {
 		this.n = noise(this.pos.x * this.ns, this.pos.y * this.ns, this.off);
-		this.ns = map(this.n, 0, 1, 0.0008, 0.001);
+		this.ns = map(this.n, 0, 1, 0.0005, 0.0008);
 		let dil = map(sin(this.n * TAU), 0, 1, 5, this.maxDil);
-		//if (this.count % 20 == 0) {
-		let fa = this.n * TAU * dil;
 		let s = map(this.n * 8, 0, 1, 6, 0.5);
+		let fa = this.n * TAU * dil;
+		if (this.constrain < this.constrainAmt) {
+			fa = this.n * TAU * 5;
+			s = PI / 4;
+		}
 		this.a = round(fa / s) * s;
 		this.dir.x = cos(this.a);
 		this.dir.y = sin(this.a);
