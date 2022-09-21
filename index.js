@@ -1,18 +1,18 @@
 /*
 
-Estados en monocromo.
+Crece.
 
 Andrés Senn
 */
 let overlay,
-	loaded = false,
-	laps = 2,
-	lap = 0,
+	loaded = false, // overlay loaded
+	laps = 2, // Draw times
+	lap = 0, // Lap counter
 	seed,
-	particles,
+	particles, // Paricles array
 	numPart, // Particles amount
-	partConn = [],
-	partConnSz,
+	partConn = [], // Particle connections
+	partConnSz, // Particle connections
 	partBif,
 	partBifDist,
 	psw = 10,
@@ -25,10 +25,14 @@ let overlay,
 	llen,
 	whench,
 	rectr,
-	monocromo,
-	monocromo2,
-	monocromo3,
-	bright,
+	// palettes
+	palette,
+	bgcolors = [0, 0, 290, 200, 320, 320, 290], // 0/190 - 0/60 - 290 / 60 -200/190 - 320/180
+	fgcolors = [190, 60, 60, 190, 180, 290, 30],
+	cromo1,
+	cromo2,
+	cromo3,
+	randomRectColor,
 	sat = 70,
 	maxRectSz,
 	bw, // black or white,
@@ -36,15 +40,8 @@ let overlay,
 	maxMinp,
 	maxMainp,
 	limitf = 240,
-	// palettes
-	palette = [
-		0, //Complementary
-	],
-	idxcolor,
-	bgcolors = [0, 0, 290, 200, 320, 320, 290], // 0/190 - 0/60 - 290 / 60 -200/190 - 320/180
-	fgcolors = [190, 60, 60, 190, 180, 290, 30],
 	// Part circ
-	partCirc,
+	// partCirc,
 	// Slice
 	sliaceW = 0,
 	// circles
@@ -55,11 +52,11 @@ let overlay,
 	pbgNoise;
 
 function setup() {
-	seed = int(fxrand() * 1111111191111111);
+	seed = 3;//int(fxrand() * 1111111191111111);
 	overlay = document.querySelector(".overlay");
 	let cv = createCanvas(2160, 2160);
 	pbgNoise = createGraphics(width, height);
-	cv.id("monocromo");
+	cv.id("Crece");
 	// Pixel density param
 	const uparams = getURLParams();
 	if (uparams.pd) {
@@ -70,11 +67,11 @@ function setup() {
 
 	colorMode(HSB, 360, 100, 100, 100);
 
-	render();
+	init();
 
-	document.title = `Otro | Andr\u00e9s Senn | 2022`;
+	document.title = `Crece | Andr\u00e9s Senn | septiembre - 2022`;
 	console.log(
-		`%cOtro | Andr\u00e9s Senn | Projet: `,
+		`%cCrece | Andr\u00e9s Senn | Projet: `,
 		"background:#333;border-radius:10px;background-size:15%;color:#eee;padding:10px;font-size:15px;text-align:center;",
 	);
 	noFill();
@@ -89,11 +86,16 @@ function draw() {
 		translate(-width / 2, -height / 2);
 	}
 	noSmooth();
+	// Three times asceleration
 	for (let i = 0; i < 3; i++) {
 		push();
+		// Transate to center of canvas
 		translate(width / 2, height / 2);
+		// rotate
 		rotate(rot);
+		// Particles
 		particles.forEach((p) => {
+			// Angle
 			let a = p.a + frameCount * 0.01;
 			p.update();
 			strokeWeight(0.6);
@@ -101,23 +103,35 @@ function draw() {
 			translate(p.pos.x, p.pos.y);
 			let s = map(sin(a * 3), -1, 1, 5, 200);
 			setShadow(0, 0, 0, 0);
+
+			// Draw background details texture
+
 			if (frameCount > 100) {
+				// Draw after frame 100
 				if (id % 6 == 0) {
 					strokeWeight(random(0.6, 2));
+
+					let mcc = cromo1;
+					// If analogue palette set different color space
+					if (p.pos.y > height / 2) {
+						mcc = cromo3;
+					}
 					stroke(
-						monocromo,
+						mcc,
 						sat,
 						map(sin(a * 10), -1, 1, 40, 100),
 						map(sin(a * 10), -1, 1, 0, 4),
 					);
+					// Draw smooth lines texture
 					line(-s * llen * 0.4, 0, s * llen * 0.4, 0);
 					if (random() > 0.8) {
+						// prob 20%
 						line(0, -s * llen * 0.2, 0, s * llen * 0.2);
 					}
-
+					// Draw smooth cicles 50 prob
 					if (iscircl < 0.5) {
 						stroke(
-							monocromo,
+							cromo1,
 							sat,
 							map(sin(a * 5), -1, 1, 20, 100),
 							map(sin(a * 2), -1, 1, 0, 2),
@@ -127,8 +141,15 @@ function draw() {
 				}
 			} else {
 				if (id % 10 == 0) {
+					// Draw smooth rects
+					let mcc = cromo1;
+					// Set different color with height reference
+					if (p.pos.y > height / 2) {
+						mcc = cromo3;
+					}
+
 					stroke(
-						monocromo,
+						mcc,
 						sat,
 						map(sin(a * 5), -1, 1, 40, 100),
 						map(sin(a * 3), -1, 1, 2, 10),
@@ -141,22 +162,28 @@ function draw() {
 				}
 			}
 			pop();
+			// ----------------------------------------------------------
 			// Render ---------------------------------------------------
 			if (p.render) {
-				let SH = map(sin(a * 5), -1, 1, 3, 30);
+				// Only render away from canvas limits
+
+				// Shadow
+				let SH = map(sin(a * 5), -1, 1, 3, 30); // Sahdow offset
 				setShadow(0, SH, SH, 60);
-				// let B = map(frameCount, 0, limitf, 40, 100);
+				
+				// Sat
+				let S = map(frameCount, sat, limitf, 100, 50);
+				// Bright
 				let B = map(sin(a * 2), -1, 1, 0, 100);
-				// if (gbg > 200) {
-				// 	B = map(sin(a * 2), -1, 1, 40, 100);
-				// }
-				let S = map(frameCount, sat, limitf, bright, 50);
+				
+				// Desaturate 20% prob
 				if (bw < 0.2) {
 					S = 0;
 				}
+
+				// Draw
 				if (frameCount > whench) {
-					// POINTS --------------------------------------
-					// Sizes
+					// Second, draw the points ---------------------
 					let swp = map(frameCount / limitf, 0, 1, 1, 0.7);
 					let sw = psw;
 					if (id % 50 == 0) {
@@ -166,23 +193,7 @@ function draw() {
 						map(sin(a * sinvel), -1, 1, 1 * swp, sw * swp),
 					);
 					// Main Points
-					stroke(monocromo, 0, B, 100);
-					// if (
-					// 	isbicolor
-					// 	// &&
-					// 	// frameCount % limitf > limitf * 0.12 &&
-					// 	// frameCount % limitf < limitf * 0.6
-					// ) {
-					// 	// let amt = constrain(
-					// 	// 	map(frameCount, limitf * 0.12, limitf * 0.6, 0, 1),
-					// 	// 	0,
-					// 	// 	1,
-					// 	// );
-					// 	// let c1 = color(bicolor[][0], S, B, 100);
-					// 	// let c2 = color(monocromo2, S, B, 100);
-					// 	// let lerp = lerpColor(c1, c2, amt);
-					// 	stroke(monocromo2, S, B, 100);
-					// }
+					stroke(cromo1, 0, B, 100);
 					point(p.pos.x, p.pos.y);
 
 					if (id % 50 == 0) {
@@ -259,27 +270,46 @@ function draw() {
 						map(sin(a * sinvel), -1, 1, 0.2 * swp, sw * 0.2 * swp),
 					);
 				} else {
-					// RECTS --------------------------------------
+					// first draw the rects *************************************
 					noStroke();
 					rectMode(CENTER);
-					stroke(monocromo, S, B, 100);
-					if (lap == 1) {
-						stroke(monocromo, S * 0.3, B * 0.8, 100);
-					}
-					let sz = map(sin(a * sinvel), -1, 1, 5, maxRectSz);
-					let szr = map(sin(a * sinvel), -1, 1, 0, maxRectSz);
-					if (rectr < 0.5) {
-						szr = 0;
-					}
+
+					// Each 3 draw dots
 					if (id % 3 == 0) {
-						// Dots
+						// Dots decoration --------------------------------
 						strokeWeight(random(1, 3));
+						// Dots in BW and change stroke settings
 						stroke(int(random(2)) * 360, random(20, 60));
+						if (
+							randomRectColor &&
+							frameCount > 20 &&
+							frameCount < 50
+						) {
+							stroke(int(random(361)), 100, 100, random(80, 100));
+						}
 						point(
 							p.pos.x + random(-100, 100),
 							p.pos.y + random(-100, 100),
 						);
 					}
+
+					// Rect size
+					let sz = map(sin(a * sinvel), -1, 1, 5, maxRectSz);
+					// Rounded size
+					let szr = map(sin(a * sinvel), -1, 1, 0, maxRectSz);
+					// set roundness to zero
+					if (rectr < 0.5) {
+						szr = 0;
+					}
+
+					// Ver este bloque -> estaba arriba ---------------------
+					stroke(cromo1, S, B, 100);
+					// Lap 1 is second lap
+					if (lap == 1) {
+						// Set low values
+						stroke(cromo1, S * 0.3, B * 0.8, 100);
+					}
+					// ------------------------------------------------------
 					strokeWeight(random(0.6, 1.6));
 					rect(p.pos.x, p.pos.y, sz, sz, szr, 0, szr, 0);
 				}
@@ -303,7 +333,7 @@ function draw() {
 		if (lap == 1) {
 			maxRectSz = maxRectSz * random(0.1, 0.2);
 			maxMainp = maxMainp * 0.5;
-			monocromo = monocromo3;
+			cromo1 = cromo3;
 			psw = 5;
 		}
 		if (lap == laps) {
@@ -314,27 +344,29 @@ function draw() {
 		}
 	}
 }
-function render() {
+function init() {
+	// Initializations
 	randomSeed(seed);
 	noiseSeed(seed);
-	idxcolor = floor(random(fgcolors.length));
-	// Colors ---------
-	monocromo = (floor(random(360) / 30) * 30) % 360; //(floor(random(360) / 20) * 20 + 80) % 360;
-	monocromo2 = (monocromo + 180) % 360; //bgcolors[idxcolor]; //(floor(random(360) / 20) * 20 + 40) % 360;
-	monocromo3 = monocromo;
-	if (random() < 0.5) {
-		monocromo2 = (monocromo + 30) % 360; //bgcolors[idxcolor]; //(floor(random(360) / 20) * 20 + 40) % 360;
-		monocromo3 = (monocromo - 30) % 360;
+
+	// Complementary palette
+	cromo1 = (floor(random(360) / 30) * 30) % 360; // each 30;
+	cromo2 = (cromo1 + 180) % 360; // oposite in the wheel;
+	cromo3 = cromo1; // Same as 2
+
+	// Analogue palette
+	// Near in the wheel
+	if (palette < 0.5) {
+		cromo2 = (cromo1 + 30) % 360;
+		cromo3 = (cromo1 - 30) % 360;
 	}
 	// ----------------
-	console.log(monocromo, monocromo2);
-	bright = 100;
-	rot = int(random(4)) * HALF_PI;
-	rerot = (floor(random(1, 9)) * HALF_PI) / 2;
-	sinvel = random(1, 3);
+	rot = int(random(4)) * HALF_PI; // Rotate all
+	rerot = (floor(random(1, 9)) * HALF_PI) / 2; // Add second rotation
+	sinvel = random(1, 3); // Multiply velicity of angle in particles
 	llen = random(0.5, 5);
 	whench = random(20, limitf * 0.6);
-	maxRectSz = random(80, 500);
+	maxRectSz = random(80, 300);
 	rectr = random(2.0) % 1.0;
 	bw = 0; //random();
 	partShape = random(); // Line / Circle / square
@@ -343,10 +375,12 @@ function render() {
 	maxMinp = random(5, 20);
 	gbg = 0; // default bg color
 	gbgDo = random();
-	laps = 2;
+	laps = floor(random(2)) + 1; // Ver random dos laps
+	randomRectColor = boolean(floor(random(2)));
+	palette = random();
 	//
-	partCirc = boolean(int(random(3) - 1));
-	partBif = boolean(int(random(2)));
+	// partCirc = boolean(floor(random(3) - 1));
+	partBif = boolean(floor(random(2)));
 	partBifDist = random(200, 800);
 
 	// Slice width
@@ -365,11 +399,11 @@ function render() {
 
 	background(gbg);
 	if (gbgDo < 0.3) {
-		// gbg = color(monocromo2, 100, 30);
+		// gbg = color(cromo2, 100, 30);
 		push();
 		rotateAll(4);
 		// if (random() < 0.5) {
-		colorBg(color(monocromo2, sat, 20));
+		colorBg(color(cromo2, sat, 20));
 		// } else {
 		// 	colorBg(color(monocromo, 100, 20));
 		// }
@@ -506,27 +540,13 @@ function bgRect() {
 	noStroke();
 	background(255);
 	let fi = drawingContext.createLinearGradient(0, 0, width, 0);
-	fi.addColorStop(0, color(monocromo, sat, 100));
-	fi.addColorStop(1, color(monocromo, sat, 0));
+	fi.addColorStop(0, color(cromo1, sat, 100));
+	fi.addColorStop(1, color(cromo1, sat, 0));
 	drawingContext.fillStyle = fi;
 	rect(0, 0, width, height);
 	pop();
 }
 
-// function keyPressed() {
-// 	switch (key) {
-// 		case "1":
-// 			overlay.style.display = "flex";
-// 			clear();
-// 			pixelDensity(1);
-// 			break;
-// 		case "2":
-// 			overlay.style.display = "flex";
-// 			clear();
-// 			pixelDensity(2);
-// 			break;
-// 	}
-// }
 function keyReleased() {
 	switch (key) {
 		case "1":
