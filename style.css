@@ -39,9 +39,25 @@ canvas {
 	background: rgb(0, 0, 0);
 	z-index: 999;
 }
-.overlay img {
+.overlay p{
+	display:inline-block;
+	position:relative;
+	opacity:0.5;
+	animation: 0.5s infinite forwards alternate _anim;
+	-moz-animation: 0.5s infinite forwards alternate _anim;
+	-webkit-animation: 0.5s infinite forwards alternate _anim;
+}
+.overlay p img {
 	object-fit: contain;
 	object-position: center;
 	max-width: 50px;
 	border-radius: 999px;
+}
+@keyframes _anim{
+	0%{
+		opacity: 0.5;
+	}
+	100%{
+		opacity: 0.9;
+	}
 }

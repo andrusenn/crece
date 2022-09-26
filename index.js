@@ -27,7 +27,8 @@ let overlay,
 	rectr,
 	// palettes
 	palette,
-	bgcolors = [0, 0, 290, 200, 320, 320, 290], // 0/190 - 0/60 - 290 / 60 -200/190 - 320/180
+	// 0/190 - 0/60 - 290 / 60 -200/190 - 320/180
+	bgcolors = [0, 0, 290, 200, 320, 320, 290], 
 	fgcolors = [190, 60, 60, 190, 180, 290, 30],
 	cromo1,
 	cromo2,
@@ -40,10 +41,8 @@ let overlay,
 	maxMinp,
 	maxMainp,
 	limitf = 240,
-	// Part circ
-	// partCirc,
 	// Slice
-	sliaceW = 0,
+	//sliaceW = 0,
 	// circles
 	iscircl,
 	diamMin,
@@ -52,7 +51,7 @@ let overlay,
 	pbgNoise;
 
 function setup() {
-	seed = 3;//int(fxrand() * 1111111191111111);
+	seed = int(fxrand() * 1111111191111111);
 	overlay = document.querySelector(".overlay");
 	let cv = createCanvas(2160, 2160);
 	pbgNoise = createGraphics(width, height);
@@ -170,12 +169,12 @@ function draw() {
 				// Shadow
 				let SH = map(sin(a * 5), -1, 1, 3, 30); // Sahdow offset
 				setShadow(0, SH, SH, 60);
-				
+
 				// Sat
 				let S = map(frameCount, sat, limitf, 100, 50);
 				// Bright
 				let B = map(sin(a * 2), -1, 1, 0, 100);
-				
+
 				// Desaturate 20% prob
 				if (bw < 0.2) {
 					S = 0;
@@ -384,7 +383,7 @@ function init() {
 	partBifDist = random(200, 800);
 
 	// Slice width
-	sliaceW = random(50, 1000);
+	//sliaceW = random(50, 1000);
 	// circles
 	iscircl = random();
 	diamMin = random(10, 50);
@@ -556,7 +555,7 @@ function keyReleased() {
 			doPD("2");
 			break;
 		case "3":
-			doPD("2.4");
+			doPD("3");
 			break;
 	}
 	if (key == "s" || key == "S") {
