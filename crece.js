@@ -10,8 +10,11 @@ let overlay,
 	loaded = false, // overlay loaded
 	laps = 2, // Draw times
 	lap = 0, // Lap counter
+	isLooping = true,
 	seed,
+	beyond = false,
 	particles, // Paricles array
+	iparticles, // Particles array copy
 	numPart, // Particles amount
 	partConn = [], // Particle connections
 	partConnSz, // Particle connections
@@ -36,7 +39,7 @@ let overlay,
 	cromo2,
 	cromo3,
 	randomRectColor,
-	sat = 70, // Palete saturation 0-100
+	sat = 0, // Palete saturation 0-100
 	maxRectSz,
 	bw, // black or white,
 	partShape,
@@ -50,7 +53,7 @@ let overlay,
 	pbgNoise;
 
 function setup() {
-	seed = int(fxrand() * 1111111191111111);
+	seed = int(fxrand() * 9876556789);
 	overlay = document.querySelector(".overlay");
 	let cv = createCanvas(2160, 2160);
 	pbgNoise = createGraphics(width, height);
@@ -349,11 +352,21 @@ function draw() {
 			psw = 5;
 		}
 		// Ends
-		if (lap == laps) {
+		if (lap == laps && !beyond) {
 			noLoop();
+			isLooping = false;
 			if (!isFxpreview) {
 				fxpreview();
 			}
+		}
+		// What happens beyond?
+		if (particles.length <= 1) {
+			particles = iparticles.map((x) => x);
+			lap = 0;
+			maxRectSz = maxRectSz * random(0.1, 0.2);
+			maxMainp = maxMainp * 0.5;
+			cromo1 = cromo3;
+			psw = 5;
 		}
 	}
 }
@@ -385,7 +398,7 @@ function init() {
 	palette = random();
 	partBif = boolean(floor(random(2)));
 	partBifDist = random(200, 800);
-
+	sat = round(random(0, 50));
 	// circles
 	iscircl = random();
 	diamMin = random(10, 50);
@@ -419,7 +432,7 @@ function init() {
 		features["moment"] = "Any moment";
 		push();
 		rotateAll(4);
-		colorBg(color(cromo2, sat, 20));
+		colorBg(color(cromo2, sat, random(10, 80)));
 		pop();
 	}
 	rotateAll(4);
@@ -492,7 +505,8 @@ function init() {
 			particles.push(p);
 		}
 	}
-
+	//
+	iparticles = particles.map((e) => e);
 	// Part conn
 	let partConnNum = random(2, 8);
 	partConn = [];
@@ -511,7 +525,7 @@ function init() {
 	window.$fxhashFeatures = {
 		"Pigmentary composition of the metaphor": features["palette"],
 		"Grow impulse of shape": features["grows"] + "%",
-		"Elderly of the metaphor": round(map(bw,0,1,100,1)) + "%",
+		"Elderly of the metaphor": round(map(sat, 0, 50, 1, 100)) + "%",
 		"The moment": features["moment"],
 		"Growth duration": round(map(limitf, 180, 280, 1, 100)) + "%",
 		Rhizome: round(numPart) + " ramifications",
@@ -594,6 +608,19 @@ function keyReleased() {
 	if (key == "s" || key == "S") {
 		grabImage();
 	}
+	if (key == "l" || key == "L") {
+		beyond = true;
+		if (!isLooping) {
+			loop();
+		} else {
+			noLoop();
+		}
+		isLooping = !isLooping;
+	}
+}
+
+function doubleClicked() {
+	grabImage();
 }
 function doPD(n) {
 	if (window.location.href.includes("?")) {

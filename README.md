@@ -35,8 +35,10 @@ El momento
 
 Keys:
 
-[1,2,3] -> change pixel density. Be aware for the file size in render. (Can be incressed passing via url ?pd=)
+[1,2,3] -> change pixel density. Be aware for the file size in render. (Or can be passed via url ?pd= different numbers)
 [s] -> download canvas capture. Differents dixel density, differents sizes.
+[double tap] -> download canvas capture on mobile
+[L] -> (loop/noLoop) what happens if it doesn't stop?
 
 <img src="https://github.com/andrusenn/crece/blob/master/images/01.jpg?raw=true" width="200"> <img src="https://github.com/andrusenn/crece/blob/master/images/02.jpg?raw=true" width="200"> <img src="https://github.com/andrusenn/crece/blob/master/images/03.jpg?raw=true" width="200"> <img src="https://github.com/andrusenn/crece/blob/master/images/04.jpg?raw=true" width="200"> 
 
