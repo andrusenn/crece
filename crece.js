@@ -38,6 +38,7 @@ let overlay,
 	cromo1,
 	cromo2,
 	cromo3,
+	cromo4,
 	randomRectColor,
 	sat = 0, // Palete saturation 0-100
 	maxRectSz,
@@ -170,15 +171,15 @@ function draw() {
 
 				// Shadow
 				let SH = map(sin(a * 5), -1, 1, 3, 30); // Sahdow offset
-				setShadow(0, SH, SH, 60);
+				setShadow(0, SH, SH, 40);
 
-				// Sat 100 - 50 Depends on frames
-				let S = map(frameCount, sat, limitf, 20, 0);
+				// Sat depends on frames
+				let S = map(frameCount, sat, limitf, 40, 0);
 				// Bright 0 - 100 Depends on particle angle
 				let B = map(sin(a * 2), -1, 1, 0, 100);
 
-				// BW 50% prob
-				if (bw < 0.5) {
+				// BW
+				if (bw < 0.3) {
 					S = 0;
 				}
 
@@ -221,6 +222,9 @@ function draw() {
 
 					// Colors and draw rects -------------------------------
 					stroke(cromo1, S, B, 100);
+					if (map(frameCount, 0, limitf, 0, 10) > 2) {
+						stroke(cromo2, S, B, 100);
+					}
 					// Lap 1 is second lap
 					if (lap == 1) {
 						// Set low values
@@ -406,16 +410,30 @@ function init() {
 
 	// Complementary palette
 	features["palette"] = "Opposite";
-	cromo1 = (floor(random(360) / 30) * 30) % 360; // each 30;
+	cromo1 = floor(random(360) + 90) % 360; // each 30;
 	cromo2 = (cromo1 + 180) % 360; // oposite in the wheel;
 	cromo3 = cromo1; // Same as 2
+	cromo4 = cromo2; // Same as 2
 
 	// Analogue palette
 	// Near in the wheel
-	if (palette < 0.5) {
+	if (palette < 0.8) {
 		features["palette"] = "Near";
 		cromo2 = (cromo1 + 30) % 360;
 		cromo3 = (cromo1 - 30) % 360;
+		cromo4 = cromo1;
+	}
+	if (palette < 0.5) {
+		features["palette"] = "Triangle";
+		cromo2 = (cromo1 + 120) % 360;
+		cromo3 = (cromo1 - 120) % 360;
+		cromo4 = cromo3;
+	}
+	if (palette < 0.3) {
+		features["palette"] = "Quad";
+		cromo2 = (cromo1 + 90) % 360;
+		cromo3 = (cromo1 + 180) % 360;
+		cromo4 = (cromo1 - 90) % 360;
 	}
 
 	rectMode(CENTER);
@@ -433,6 +451,12 @@ function init() {
 		push();
 		rotateAll(4);
 		colorBg(color(cromo2, sat, random(10, 80)));
+		if (palette < 0.5) {
+			colorBg(color(cromo3, sat, random(10, 80)));
+		}
+		if (palette < 0.3) {
+			colorBg(color(cromo4, sat, random(10, 80)));
+		}
 		pop();
 	}
 	rotateAll(4);
@@ -525,7 +549,7 @@ function init() {
 	window.$fxhashFeatures = {
 		"Pigmentary composition of the metaphor": features["palette"],
 		"Grow impulse of shape": features["grows"] + "%",
-		"Elderly of the metaphor": round(map(sat, 0, 50, 1, 100)) + "%",
+		"Oldness of the metaphor": round(map(sat, 0, 50, 1, 100)) + "%",
 		"The moment": features["moment"],
 		"Growth duration": round(map(limitf, 180, 280, 1, 100)) + "%",
 		Rhizome: round(numPart) + " ramifications",
@@ -544,7 +568,6 @@ function colorBg(c) {
 		random() * height,
 	);
 	fi.addColorStop(0, c);
-	// fi.addColorStop(random(0.3, 0.5), color(0));
 	fi.addColorStop(1, color(0));
 	drawingContext.fillStyle = fi;
 	rect(width / 2, height / 2, width, height);

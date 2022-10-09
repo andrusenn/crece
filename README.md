@@ -4,11 +4,11 @@
 Crece (It grows) is the manifestation of the metaphor in relation to materiality and abstraction.
 Only sensations that escape the everyday. The time in which it is built and grows, shows and hides ungraspable instants. What form would the metaphor take before it grew?
 
-This project is based on the investigation of the algorithm used in 99 recorridos and has to do with three questions, the animated effect of growth of the drawing that resembles roots as in 99 recorridos, but in this case it does not evoke the natural, but the artificial with the inclusion of harsher, straighter lines that is more closely to sci-fi imagery. On the other hand, it has to do with the growth of the algorithm, from new lines of code that give it its personality. Thirdly, a metaphorical, imaginary and internal growth that arises from that dialogue that enriches our souls in this coexistence.
+This project is based on the investigation of the algorithm used in 99 recorridos and has to do with three questions, the animated effect of growth of the drawing that resembles roots as in 99 recorridos, but in this case it does not evoke the natural, but the artificial with the inclusion of harsher, straighter lines that is more closely to sci-fi imagery. Second, it has to do with the growth of the algorithm, from new lines of code that give it its personality. Thirdly, a metaphorical, imaginary and internal growth that arises from that dialogue that enriches our souls in this coexistence.
 
 Playing with features:
 
-Elderly of the metaphor
+Oldness of the metaphor
 Grow impulse of shape
 Growth duration
 Pigmentary composition of the metaphor
