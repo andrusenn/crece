@@ -1,9 +1,7 @@
 /*
-
-Crece.
-
-Andrés Senn
-675435890
+Project: Crece. ¿Cuál es la forma de la metáfora?
+Platform: fxhash.xyz
+By Andrés Senn
 */
 let overlay,
 	features = {},
@@ -32,9 +30,6 @@ let overlay,
 	rectr,
 	// palettes
 	palette,
-	// 0/190 - 0/60 - 290 / 60 -200/190 - 320/180
-	bgcolors = [0, 0, 290, 200, 320, 320, 290],
-	fgcolors = [190, 60, 60, 190, 180, 290, 30],
 	cromo1,
 	cromo2,
 	cromo3,
@@ -49,15 +44,12 @@ let overlay,
 	limitf = 240,
 	iscircl,
 	diamMin,
-	diamMax,
-	// Noise
-	pbgNoise;
+	diamMax;
 
 function setup() {
 	seed = int(fxrand() * 9876556789);
 	overlay = document.querySelector(".overlay");
 	let cv = createCanvas(2160, 2160);
-	pbgNoise = createGraphics(width, height);
 	cv.id("Crece");
 	// Pixel density param
 	const uparams = getURLParams();
@@ -73,7 +65,7 @@ function setup() {
 
 	document.title = `Crece | Andr\u00e9s Senn | septiembre - 2022`;
 	console.log(
-		`%cCrece | what is the shape of the metaphor? - Andr\u00e9s Senn 2022 | Projet: https://github.com/andrusenn/crece`,
+		`%cCrece | Cu\u00E1l es la forma de la met\u00E1fora? - Andr\u00e9s Senn 2022 | Projet: https://github.com/andrusenn/crece`,
 		"background:#333;border-radius:10px;background-size:15%;color:#eee;padding:10px;font-size:15px;text-align:center;",
 	);
 	noFill();
@@ -117,6 +109,9 @@ function draw() {
 					// If analogue palette set different color space
 					if (p.pos.y > height / 2) {
 						mcc = cromo3;
+					}
+					if (p.pos.y > width / 2) {
+						mcc = cromo4;
 					}
 					stroke(
 						mcc,
@@ -179,7 +174,7 @@ function draw() {
 				let B = map(sin(a * 2), -1, 1, 0, 100);
 
 				// BW
-				if (bw < 0.3) {
+				if (bw < 0.5) {
 					S = 0;
 				}
 
@@ -222,7 +217,7 @@ function draw() {
 
 					// Colors and draw rects -------------------------------
 					stroke(cromo1, S, B, 100);
-					if (map(frameCount, 0, limitf, 0, 10) > 2) {
+					if (map(frameCount, 0, limitf, 0, 10) > 2 && features["palette"] == "Near") {
 						stroke(cromo2, S, B, 100);
 					}
 					// Lap 1 is second lap
@@ -389,13 +384,13 @@ function init() {
 	whench = random(0, limitf * 0.6); // When change rects with points
 	maxRectSz = random(80, 300); // Max rect size
 	rectr = random(2.0) % 1.0; // Rect roundness
-	bw = random();
+	bw = (random() + random()) / 2;
 	partShape = random(); // Line / Circle / square
 	partConnSz = random(0.1, 1);
 	maxMainp = random(10, 50);
 	maxMinp = random(5, 20);
 	gbg = 0; // default bg color
-	gbgDo = random();
+	gbgDo = (random() + random()) / 2;
 	let grow_impulse = random(2);
 	laps = floor(grow_impulse) + 1; // Ver random dos laps
 	randomRectColor = boolean(floor(random(2)));
@@ -404,14 +399,15 @@ function init() {
 	partBifDist = random(200, 800);
 	sat = round(random(0, 50));
 	// circles
-	iscircl = random();
+	iscircl = (random() + random() + random()) / 3;
 	diamMin = random(10, 50);
 	diamMax = random(150, 400);
 
 	// Complementary palette
 	features["palette"] = "Opposite";
-	cromo1 = floor(random(360) + 90) % 360; // each 30;
-	cromo2 = (cromo1 + 180) % 360; // oposite in the wheel;
+	let cnums = [0, 0, 35, 35, 60, 60, 170, 275, 302, 320];
+	cromo1 = cnums[floor(random() * cnums.length)];
+	cromo2 = (cromo1 + 180) % 360;
 	cromo3 = cromo1; // Same as 2
 	cromo4 = cromo2; // Same as 2
 
@@ -460,7 +456,7 @@ function init() {
 		pop();
 	}
 	rotateAll(4);
-	bgNoise2();
+	bgNoise();
 
 	setShadow(0, 20, 20, 100);
 
@@ -574,20 +570,20 @@ function colorBg(c) {
 	pop();
 	noFill();
 }
-function bgNoise2(amin = 5, amax = 10) {
-	pbgNoise.clear();
-	pbgNoise.background(0, 0, 0, 0);
-	for (let x = 0; x < pbgNoise.width; x += 4) {
-		for (let y = 0; y < pbgNoise.height; y += 4) {
+function bgNoise(amin = 5, amax = 10) {
+	push();
+	noFill();
+	for (let x = 0; x < width; x += 4) {
+		for (let y = 0; y < height; y += 4) {
 			strokeWeight(random(1, 5));
 			stroke(
 				random(361),
-				map(x, 0, pbgNoise.width, 0, random(amin, amax)),
+				map(x, 0, width, 0, random(amin, amax)),
 			);
 			point(x + random(-5, 5), y + random(-5, 5));
 		}
 	}
-	image(pbgNoise, 0, 0);
+	pop();
 }
 function rotateAll(r = 8) {
 	translate(width / 2, height / 2);
