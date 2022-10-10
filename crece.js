@@ -1,7 +1,9 @@
 /*
-Project: Crece. ¿Cuál es la forma de la metáfora?
+Project: Crece. ¿Cuál es la forma de la metáfora? - Oct - 2022
 Platform: fxhash.xyz
 By Andrés Senn
+
+572179552
 */
 let overlay,
 	features = {},
@@ -18,6 +20,8 @@ let overlay,
 	partConnSz, // Particle connections
 	partBif,
 	partBifDist,
+	doVarAng,
+	ranVarAng,
 	psw = 10,
 	gbg, // Background,
 	gbgDo, // Background,
@@ -63,7 +67,7 @@ function setup() {
 
 	init();
 
-	document.title = `Crece | Andr\u00e9s Senn | septiembre - 2022`;
+	document.title = `Crece | Andr\u00e9s Senn | Octubre - 2022`;
 	console.log(
 		`%cCrece | Cu\u00E1l es la forma de la met\u00E1fora? - Andr\u00e9s Senn 2022 | Projet: https://github.com/andrusenn/crece`,
 		"background:#333;border-radius:10px;background-size:15%;color:#eee;padding:10px;font-size:15px;text-align:center;",
@@ -181,7 +185,6 @@ function draw() {
 				// ---------------------
 				// Draw points or rects
 				// ---------------------
-
 				if (frameCount < whench) {
 					// first draw the rects *************************************
 					noStroke();
@@ -379,12 +382,12 @@ function init() {
 
 	// ----------------
 
-	limitf = int(random(180, 280));
+	limitf = int(random(220, 280));
 	rot = int(random(4)) * HALF_PI; // Rotate all
 	rerot = (floor(random(1, 9)) * HALF_PI) / 2; // Add second rotation
 	sinvel = random(1, 3); // Multiply velicity of angle in particles
 	llen = random(0.5, 5); // Lines length
-	whench = random(0, limitf * 0.6); // When change rects with points
+	whench = random(10, limitf * 0.5); // When change rects with points
 	maxRectSz = random(80, 300); // Max rect size
 	rectr = random(2.0) % 1.0; // Rect roundness
 	bw = (random() + random()) / 2;
@@ -393,16 +396,18 @@ function init() {
 	maxMainp = random(10, 50);
 	maxMinp = random(5, 20);
 	gbg = 0; // default bg color
-	gbgDo = (random() + random()) / 2;
+	gbgDo = random();
 	let grow_impulse = random(2);
 	laps = floor(grow_impulse) + 1; // laps
-	randomRectColor = boolean(floor(random(2)));
+	randomRectColor = random() < 0.5;
 	palette = random();
-	partBif = boolean(floor(random(2)));
+	partBif = random() < 0.5;
 	partBifDist = random(200, 800);
+	doVarAng = random() < 0.5;
+	ranVarAng = random() < 0.6;
 	sat = round(random(0, 50));
 	// circles
-	iscircl = (random() + random() + random()) / 3;
+	iscircl = random();
 	diamMin = random(10, 50);
 	diamMax = random(150, 400);
 
@@ -431,7 +436,7 @@ function init() {
 	}
 	// Double complementary
 	if (palette < 0.3) {
-		features["palette"] = "Quad";
+		features["palette"] = "Tetra";
 		cromo2 = (cromo1 + floor(random(60, 91))) % 360;
 		cromo3 = (cromo1 + 180) % 360;
 		cromo4 = (cromo2 + 180) % 360;
@@ -439,7 +444,7 @@ function init() {
 
 	rectMode(CENTER);
 
-	// background
+	// backgrounds
 	features["moment"] = "Void";
 	if (gbgDo < 0.6) {
 		features["moment"] = "In thoughts";
@@ -447,7 +452,7 @@ function init() {
 	}
 
 	background(gbg);
-	if (gbgDo < 0.3) {
+	if (gbgDo < 0.36) {
 		features["moment"] = "Any moment";
 		push();
 		rotateAll(4);
@@ -487,11 +492,15 @@ function init() {
 			let p = new Particle(x, random(-varh, varh));
 			p.mult = random(0.6, 0.8);
 			p.maxDil = 1;
-			p.ns = random(0.0004, 0.0008);
-			p.offc = map(p.ns,0.0004, 0.0008,0.0004,0.0);//random(0.0, 0.0003);
+			p.ns = random(0.0004, 0.001);
+			p.dovarang = doVarAng;
+			if (doVarAng && !ranVarAng) {
+				p.adir = -1;
+			}
+			p.offc = map(p.ns, 0.0004, 0.001, 0.0004, 0.0); //random(0.0, 0.0003);
 			particles.push(p);
 		}
-	} else if (partShape < 0.55) {
+	} else if (partShape < 0.6) {
 		features["shape"] = "Square";
 		for (let x = -width / 2 + partBX; x < width / 2 - partBX; x += 80) {
 			for (
@@ -502,15 +511,19 @@ function init() {
 				let p = new Particle(x, y);
 				p.mult = random(0.6, 0.8);
 				p.maxDil = 1;
-				p.ns = random(0.0004, 0.0008);
-				p.offc = map(p.ns,0.0004, 0.0008,0.0004,0.0);//random(0.0, 0.0003);
+				p.ns = random(0.0004, 0.001);
+				p.dovarang = doVarAng;
+				if (doVarAng && !ranVarAng) {
+					p.adir = -1;
+				}
+				p.offc = map(p.ns, 0.0004, 0.001, 0.0004, 0.0); //random(0.0, 0.0003);
 				particles.push(p);
 			}
 		}
 	} else {
 		features["shape"] = "Circle";
 		let ang = TAU / 255;
-		let rad = random(100, 900);
+		let rad = random(200, 900);
 		for (let i = 0; i < numPart; i++) {
 			let d = 0;
 			// If bif change rad
@@ -528,8 +541,12 @@ function init() {
 			let p = new Particle(x, y);
 			p.mult = random(0.6, 0.8);
 			p.maxDil = 1;
-			p.ns = random(0.0004, 0.0008);
-			p.offc = map(p.ns,0.0004, 0.0008,0.0004,0.0);//random(0.0, 0.0003);
+			p.ns = random(0.0004, 0.001);
+			p.dovarang = doVarAng;
+			if (doVarAng && !ranVarAng) {
+				p.adir = -1;
+			}
+			p.offc = map(p.ns, 0.0004, 0.001, 0.0004, 0.0); //random(0.0, 0.0003);
 			particles.push(p);
 		}
 	}
@@ -555,7 +572,7 @@ function init() {
 		"Grow impulse of shape": features["grows"] + "%",
 		"Oldness of the metaphor": round(map(sat, 0, 50, 1, 100)) + "%",
 		"The moment": features["moment"],
-		"Growth duration": round(map(limitf, 180, 280, 1, 100)) + "%",
+		"Growth duration": round(map(limitf, 220, 280, 1, 100)) + "%",
 		Rhizome: round(numPart) + " ramifications",
 		"Shape of the metaphor": "May be a " + features["shape"] + "?",
 	};
@@ -688,6 +705,8 @@ class Particle {
 		this.maxMarg = random(100, 300);
 		this.maxDil = 10;
 		this.a = 0;
+		this.adir = floor(random(-1, 2));
+		this.dovarang = true;
 		this.dir = createVector(0, 0);
 		this.off = 0;
 		this.mult = 0.7;
@@ -710,6 +729,9 @@ class Particle {
 			s = PI / 4;
 		}
 		this.a = round(fa / s) * s;
+		if (this.dovarang) {
+			this.a *= this.adir;
+		}
 		this.dir.x = cos(this.a);
 		this.dir.y = sin(this.a);
 		this.vel.add(this.dir);
