@@ -217,7 +217,11 @@ function draw() {
 
 					// Colors and draw rects -------------------------------
 					stroke(cromo1, S, B, 100);
-					if (map(frameCount, 0, limitf, 0, 10) > 2 && features["palette"] == "Near") {
+					if (
+						map(frameCount, 0, limitf, 0, 10) > 2 &&
+						(features["palette"] == "Near" ||
+							features["palette"] == "Quad")
+					) {
 						stroke(cromo2, S, B, 100);
 					}
 					// Lap 1 is second lap
@@ -419,17 +423,19 @@ function init() {
 		cromo3 = (cromo1 - 30) % 360;
 		cromo4 = cromo1;
 	}
+	// Triade
 	if (palette < 0.5) {
 		features["palette"] = "Triangle";
 		cromo2 = (cromo1 + 120) % 360;
 		cromo3 = (cromo1 - 120) % 360;
 		cromo4 = cromo3;
 	}
+	// Double complementary
 	if (palette < 0.3) {
 		features["palette"] = "Quad";
-		cromo2 = (cromo1 + 90) % 360;
+		cromo2 = (cromo1 + floor(random(60, 91))) % 360;
 		cromo3 = (cromo1 + 180) % 360;
-		cromo4 = (cromo1 - 90) % 360;
+		cromo4 = (cromo2 + 180) % 360;
 	}
 
 	rectMode(CENTER);
@@ -482,7 +488,8 @@ function init() {
 			let p = new Particle(x, random(-varh, varh));
 			p.mult = random(0.6, 0.8);
 			p.maxDil = 1;
-			p.offc = random(0.0, 0.001);
+			p.ns = random(0.0003, 0.0008);
+			p.offc = random(0.0, 0.0003);
 			particles.push(p);
 		}
 	} else if (partShape < 0.55) {
@@ -496,7 +503,8 @@ function init() {
 				let p = new Particle(x, y);
 				p.mult = random(0.6, 0.8);
 				p.maxDil = 1;
-				p.offc = random(0.0, 0.001);
+				p.ns = random(0.0003, 0.0008);
+				p.offc = random(0.0, 0.0003);
 				particles.push(p);
 			}
 		}
@@ -521,7 +529,8 @@ function init() {
 			let p = new Particle(x, y);
 			p.mult = random(0.6, 0.8);
 			p.maxDil = 1;
-			p.offc = random(0.0, 0.001);
+			p.ns = random(0.0003, 0.0008);
+			p.offc = random(0.0, 0.0003);
 			particles.push(p);
 		}
 	}
@@ -576,10 +585,7 @@ function bgNoise(amin = 5, amax = 10) {
 	for (let x = 0; x < width; x += 4) {
 		for (let y = 0; y < height; y += 4) {
 			strokeWeight(random(1, 5));
-			stroke(
-				random(361),
-				map(x, 0, width, 0, random(amin, amax)),
-			);
+			stroke(random(361), map(x, 0, width, 0, random(amin, amax)));
 			point(x + random(-5, 5), y + random(-5, 5));
 		}
 	}
@@ -687,7 +693,7 @@ class Particle {
 		this.off = 0;
 		this.mult = 0.7;
 		this.n = 0;
-		this.ns = 0.001;
+		this.ns = random(0.0003, 0.00081);
 		this.offc = random(0.0, 0.002);
 		this.count = 0;
 		this.render = true;
@@ -696,7 +702,7 @@ class Particle {
 	}
 	update() {
 		this.n = noise(this.pos.x * this.ns, this.pos.y * this.ns, this.off);
-		this.ns = map(this.n, 0, 1, 0.0005, 0.0008);
+		this.ns = map(this.n, 0, 1, 0.0003, 0.0008);
 		let dil = map(sin(this.n * TAU), 0, 1, 5, this.maxDil);
 		let s = map(this.n * 8, 0, 1, 6, 0.5);
 		let fa = this.n * TAU * dil;

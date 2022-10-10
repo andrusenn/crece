@@ -24,6 +24,10 @@ Solo sensaciones que se escapan a lo cotidiano. El tiempo en que se construye y 
 
 Este proyeco parte de la investigación del algoritmo utilizado en 99 recorridos y tiene que ver con tres cuestiones, el efecto animado de crecimiento del dibujo que se asemeja a raíces como en 99 recorridos, pero en este caso no evoca lo natural, sino lo artificial con la inclusión de líneas más duras y rectas que se asemejan más al imaginario sci-fi. Por otra parte, tiene que ver con un crecimiento del algoritmo, a partir de nuevas líneas de código que van dando su personalidad. En tercer lugar, un crecimiento metafórico, imaginario e interno, que surge de ese diálogo que nos enriquece el alma en esta convivencia.
 
+Variaciones:
+
+- Paletas: Casi monocromo / Complementario / Análogo / Triada / Cuadra
+
 Jugando con los atributos:
 
 Vejez de la matafora
