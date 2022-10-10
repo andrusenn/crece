@@ -219,8 +219,7 @@ function draw() {
 					stroke(cromo1, S, B, 100);
 					if (
 						map(frameCount, 0, limitf, 0, 10) > 2 &&
-						(features["palette"] == "Near" ||
-							features["palette"] == "Quad")
+						features["palette"] == "Near"
 					) {
 						stroke(cromo2, S, B, 100);
 					}
@@ -396,7 +395,7 @@ function init() {
 	gbg = 0; // default bg color
 	gbgDo = (random() + random()) / 2;
 	let grow_impulse = random(2);
-	laps = floor(grow_impulse) + 1; // Ver random dos laps
+	laps = floor(grow_impulse) + 1; // laps
 	randomRectColor = boolean(floor(random(2)));
 	palette = random();
 	partBif = boolean(floor(random(2)));
@@ -471,9 +470,9 @@ function init() {
 	particles = [];
 	numPart = random(150, 220);
 	// Create particles ----------------------
-	let varh = random(150, 400);
-	let partBX = random(400, 700);
-	let partBY = random(400, 700);
+	let varh = random(300, 800);
+	let partBX = random(400, 800);
+	let partBY = random(400, 800);
 	if (partShape < 0.45) {
 		features["shape"] = "Line";
 		for (let i = 0; i < numPart; i++) {
@@ -488,8 +487,8 @@ function init() {
 			let p = new Particle(x, random(-varh, varh));
 			p.mult = random(0.6, 0.8);
 			p.maxDil = 1;
-			p.ns = random(0.0003, 0.0008);
-			p.offc = random(0.0, 0.0003);
+			p.ns = random(0.0004, 0.0008);
+			p.offc = map(p.ns,0.0004, 0.0008,0.0004,0.0);//random(0.0, 0.0003);
 			particles.push(p);
 		}
 	} else if (partShape < 0.55) {
@@ -503,8 +502,8 @@ function init() {
 				let p = new Particle(x, y);
 				p.mult = random(0.6, 0.8);
 				p.maxDil = 1;
-				p.ns = random(0.0003, 0.0008);
-				p.offc = random(0.0, 0.0003);
+				p.ns = random(0.0004, 0.0008);
+				p.offc = map(p.ns,0.0004, 0.0008,0.0004,0.0);//random(0.0, 0.0003);
 				particles.push(p);
 			}
 		}
@@ -529,8 +528,8 @@ function init() {
 			let p = new Particle(x, y);
 			p.mult = random(0.6, 0.8);
 			p.maxDil = 1;
-			p.ns = random(0.0003, 0.0008);
-			p.offc = random(0.0, 0.0003);
+			p.ns = random(0.0004, 0.0008);
+			p.offc = map(p.ns,0.0004, 0.0008,0.0004,0.0);//random(0.0, 0.0003);
 			particles.push(p);
 		}
 	}
